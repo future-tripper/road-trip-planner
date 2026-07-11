@@ -1,0 +1,16 @@
+{
+  "name": "Pathfinder — CT to Del Mar Road Trip",
+  "short_name": "Pathfinder",
+  "description": "Family + dog road trip planner: drive days, lunch pit stops, pet-friendly stays, live conditions.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5EFE0",
+  "theme_color": "#1F4D3A",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
