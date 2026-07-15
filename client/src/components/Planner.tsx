@@ -19,7 +19,7 @@ import {
   Bone, Mountain, Sparkles, Trees, Bed, UtensilsCrossed, Baby, Clock,
   Sun, X, ExternalLink, Check, Plus, ChevronRight, MapPin, Trash2, Hotel,
   Flame, CloudSun, AlertTriangle, Wind, RefreshCw, Dog, Martini, MapPinned, CarFront,
-  Navigation, CalendarClock,
+  CalendarClock,
 } from "lucide-react";
 
 const TAG_DEFS: { tag: Tag; label: string; Icon: any }[] = [
@@ -378,24 +378,6 @@ function googleMapsSearch(query: string) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
-// Turn-by-turn directions for a whole drive day: first stop = origin, last =
-// overnight, everything in between (lunch, playground, dog stop) as ordered
-// waypoints. Google caps the consumer URL at 9 waypoints; we stay well under.
-function googleMapsDirections(ordered: Stop[]): string {
-  const coord = (s: Stop) => `${s.lat},${s.lng}`;
-  const origin = ordered[0];
-  const destination = ordered[ordered.length - 1];
-  const mids = ordered.slice(1, -1).slice(0, 9);
-  const params = new URLSearchParams({
-    api: "1",
-    origin: coord(origin),
-    destination: coord(destination),
-    travelmode: "driving",
-  });
-  if (mids.length) params.set("waypoints", mids.map(coord).join("|"));
-  return `https://www.google.com/maps/dir/?${params.toString()}`;
-}
-
 function DrivePane() {
   const { activeDayId, setActiveDayId, selectedRouteId, selectedPlaceId, dayAnchor, anchorToday, clearDayAnchor } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
@@ -427,13 +409,6 @@ function DrivePane() {
     );
   }
 
-  // Directions that thread the day's real stops as waypoints (skip optional
-  // detours). Falls back to a plain from→to search if the day has too few.
-  const navStops = dayStops.filter(s => !s.optional);
-  const driveHref = navStops.length >= 2
-    ? googleMapsDirections(navStops)
-    : googleMapsSearch(`${selectedDay.from} to ${selectedDay.to}`);
-  const viaStops = navStops.slice(1, -1);
   const anchoredDay = dayAnchor ? daysForRoute.find(d => d.id === dayAnchor.dayId) : undefined;
 
   return (
@@ -475,13 +450,13 @@ function DrivePane() {
           )}
           <div className="mt-3 grid grid-cols-2 gap-2">
             <a
-              href={driveHref}
+              href={googleMapsSearch(`${selectedDay.from} to ${selectedDay.to}`)}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="link-drive-route-map"
               className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-background px-2 py-2 text-xs font-medium hover-elevate"
             >
-              <Navigation className="h-3.5 w-3.5" /> Map drive
+              <CarFront className="h-3.5 w-3.5" /> Map drive
             </a>
             <a
               href={googleMapsSearch(`${selectedDay.hotelCity} pet friendly hotel`)}
@@ -493,11 +468,6 @@ function DrivePane() {
               <Hotel className="h-3.5 w-3.5" /> Hotel map
             </a>
           </div>
-          {viaStops.length > 0 && (
-            <p className="mt-1.5 text-[11px] text-muted-foreground" data-testid="text-drive-via">
-              Routes via {viaStops.map(s => s.name).join(" → ")}
-            </p>
-          )}
           <div className="mt-3 flex items-center justify-between gap-2">
             <button
               type="button"
