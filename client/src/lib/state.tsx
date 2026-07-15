@@ -33,9 +33,16 @@ interface TripState {
   // selected route
   selectedRouteId: string;
   setSelectedRouteId: (id: string) => void;
+  // manual "we're actually on this day today" re-anchor for schedule slips
+  dayAnchor: DayAnchor | null;
+  anchorToday: (dayId: string) => void;
+  clearDayAnchor: () => void;
 }
 
 export interface ChecklistItem { text: string; done: boolean; }
+// The family tapped "we're on this day today" — remember which day, and when,
+// so every later morning maps to the right drive even if the trip slips.
+export interface DayAnchor { dayId: string; date: string; } // date = YYYY-MM-DD
 
 const Ctx = createContext<TripState | null>(null);
 
@@ -69,12 +76,41 @@ function saveJSON(key: string, value: unknown) {
   }
 }
 
-// During the trip window, open on today's drive day. Day titles carry their
-// date as "Jul 22: …", so match today's month/day against the route's days.
-function todaysDayId(routeId: string): string | null {
+function isoDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// Whole days from an anchor date (YYYY-MM-DD) to `to`, ignoring clock time.
+function daysSince(anchorISO: string, to: Date): number {
+  const [y, m, d] = anchorISO.split("-").map(Number);
+  if (!y || !m || !d) return 0;
+  const from = new Date(y, m - 1, d).getTime();
+  const toMid = new Date(to.getFullYear(), to.getMonth(), to.getDate()).getTime();
+  return Math.round((toMid - from) / 86400000);
+}
+
+// Which drive day should open "today". A manual anchor (the family tapped
+// "we're on this day today") wins: it shifts the whole schedule so a lost or
+// gained day still maps to the right drive each morning. With no anchor, fall
+// back to matching the calendar date against the day titles ("Jul 22: …").
+function computeTodaysDayId(routeId: string, anchor: DayAnchor | null): string | null {
   const route = routes.find(r => r.id === routeId);
+  if (!route) return null;
+  if (anchor) {
+    const anchorIdx = route.dayIds.indexOf(anchor.dayId);
+    if (anchorIdx !== -1) {
+      const idx = Math.min(
+        route.dayIds.length - 1,
+        Math.max(0, anchorIdx + daysSince(anchor.date, new Date())),
+      );
+      return route.dayIds[idx] ?? null;
+    }
+  }
   const now = new Date();
-  if (!route || now.getMonth() !== 6) return null; // trip days are all in July
+  if (now.getMonth() !== 6) return null; // trip days are all in July
   const prefix = `Jul ${now.getDate()}:`;
   const match = route.dayIds
     .map(id => allDays.find(d => d.id === id))
@@ -88,11 +124,15 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const stored = loadJSON<string>("route", defaultRouteId);
     return routes.some(r => r.id === stored) ? stored : defaultRouteId;
   });
+  const [dayAnchor, setDayAnchor] = useState<DayAnchor | null>(() => {
+    const stored = loadJSON<DayAnchor | null>("dayAnchor", null);
+    return stored && typeof stored.dayId === "string" && typeof stored.date === "string" ? stored : null;
+  });
   const [activeDayId, setActiveDayId] = useState<string | null>(() => {
     const storedRoute = loadJSON<string>("route", defaultRouteId);
     const routeId = routes.some(r => r.id === storedRoute) ? storedRoute : defaultRouteId;
-    // Today's drive wins over whatever was open last session.
-    const todays = todaysDayId(routeId);
+    // Today's drive (anchor-aware) wins over whatever was open last session.
+    const todays = computeTodaysDayId(routeId, loadJSON<DayAnchor | null>("dayAnchor", null));
     if (todays) return todays;
     const stored = loadJSON<string | null>("activeDay", null);
     const route = routes.find(r => r.id === routeId);
@@ -128,6 +168,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   // Persist each slice as it changes.
   useEffect(() => { saveJSON("route", selectedRouteId); }, [selectedRouteId]);
   useEffect(() => { saveJSON("activeDay", activeDayId); }, [activeDayId]);
+  useEffect(() => { saveJSON("dayAnchor", dayAnchor); }, [dayAnchor]);
   useEffect(() => { saveJSON("saved", Array.from(saved)); }, [saved]);
   useEffect(() => { saveJSON("notes", notes); }, [notes]);
   useEffect(() => { saveJSON("checklist", checklist); }, [checklist]);
@@ -169,7 +210,17 @@ export function TripProvider({ children }: { children: ReactNode }) {
     theme,
     toggleTheme: () => setTheme(t => t === "dark" ? "light" : "dark"),
     selectedRouteId, setSelectedRouteId,
-  }), [activeDayId, activeStopId, selectedPlaceId, saved, filters, notes, checklist, theme, selectedRouteId]);
+    dayAnchor,
+    anchorToday: (dayId) => {
+      setDayAnchor({ dayId, date: isoDate(new Date()) });
+      setActiveDayId(dayId);
+    },
+    clearDayAnchor: () => {
+      setDayAnchor(null);
+      const todays = computeTodaysDayId(selectedRouteId, null);
+      if (todays) setActiveDayId(todays);
+    },
+  }), [activeDayId, activeStopId, selectedPlaceId, saved, filters, notes, checklist, theme, selectedRouteId, dayAnchor]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

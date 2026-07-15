@@ -19,6 +19,7 @@ import {
   Bone, Mountain, Sparkles, Trees, Bed, UtensilsCrossed, Baby, Clock,
   Sun, X, ExternalLink, Check, Plus, ChevronRight, MapPin, Trash2, Hotel,
   Flame, CloudSun, AlertTriangle, Wind, RefreshCw, Dog, Martini, MapPinned, CarFront,
+  Navigation, CalendarClock,
 } from "lucide-react";
 
 const TAG_DEFS: { tag: Tag; label: string; Icon: any }[] = [
@@ -377,8 +378,26 @@ function googleMapsSearch(query: string) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
+// Turn-by-turn directions for a whole drive day: first stop = origin, last =
+// overnight, everything in between (lunch, playground, dog stop) as ordered
+// waypoints. Google caps the consumer URL at 9 waypoints; we stay well under.
+function googleMapsDirections(ordered: Stop[]): string {
+  const coord = (s: Stop) => `${s.lat},${s.lng}`;
+  const origin = ordered[0];
+  const destination = ordered[ordered.length - 1];
+  const mids = ordered.slice(1, -1).slice(0, 9);
+  const params = new URLSearchParams({
+    api: "1",
+    origin: coord(origin),
+    destination: coord(destination),
+    travelmode: "driving",
+  });
+  if (mids.length) params.set("waypoints", mids.map(coord).join("|"));
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
 function DrivePane() {
-  const { activeDayId, setActiveDayId, selectedRouteId, selectedPlaceId } = useTrip();
+  const { activeDayId, setActiveDayId, selectedRouteId, selectedPlaceId, dayAnchor, anchorToday, clearDayAnchor } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const daysForRoute = routeDays(selectedRoute);
   const selectedDay = daysForRoute.find(d => d.id === activeDayId) ?? daysForRoute[0];
@@ -407,6 +426,15 @@ function DrivePane() {
       </div>
     );
   }
+
+  // Directions that thread the day's real stops as waypoints (skip optional
+  // detours). Falls back to a plain from→to search if the day has too few.
+  const navStops = dayStops.filter(s => !s.optional);
+  const driveHref = navStops.length >= 2
+    ? googleMapsDirections(navStops)
+    : googleMapsSearch(`${selectedDay.from} to ${selectedDay.to}`);
+  const viaStops = navStops.slice(1, -1);
+  const anchoredDay = dayAnchor ? daysForRoute.find(d => d.id === dayAnchor.dayId) : undefined;
 
   return (
     <div>
@@ -447,13 +475,13 @@ function DrivePane() {
           )}
           <div className="mt-3 grid grid-cols-2 gap-2">
             <a
-              href={googleMapsSearch(`${selectedDay.from} to ${selectedDay.to}`)}
+              href={driveHref}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="link-drive-route-map"
               className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-background px-2 py-2 text-xs font-medium hover-elevate"
             >
-              <CarFront className="h-3.5 w-3.5" /> Map drive
+              <Navigation className="h-3.5 w-3.5" /> Map drive
             </a>
             <a
               href={googleMapsSearch(`${selectedDay.hotelCity} pet friendly hotel`)}
@@ -465,6 +493,11 @@ function DrivePane() {
               <Hotel className="h-3.5 w-3.5" /> Hotel map
             </a>
           </div>
+          {viaStops.length > 0 && (
+            <p className="mt-1.5 text-[11px] text-muted-foreground" data-testid="text-drive-via">
+              Routes via {viaStops.map(s => s.name).join(" → ")}
+            </p>
+          )}
           <div className="mt-3 flex items-center justify-between gap-2">
             <button
               type="button"
@@ -495,6 +528,36 @@ function DrivePane() {
             >
               Next day
             </button>
+          </div>
+          <div className="mt-3 rounded-md border border-border bg-muted/30 p-2.5" data-testid="drive-anchor-control">
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+              <CalendarClock className="h-3.5 w-3.5" /> Trip tracking
+            </div>
+            <p className="mt-1 text-xs text-foreground/85">
+              {anchoredDay
+                ? <>Set to <strong>Day {anchoredDay.num}</strong> as your real position — mornings now open from here, not the calendar.</>
+                : <>The app opens on today's calendar day. Off schedule? Anchor the day you're really driving and it re-syncs from there.</>}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => anchorToday(selectedDay.id)}
+                data-testid="button-anchor-today"
+                className="inline-flex items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2.5 py-1.5 text-xs font-medium hover-elevate"
+              >
+                <MapPin className="h-3.5 w-3.5" /> We're on Day {selectedDay.num} today
+              </button>
+              {anchoredDay && (
+                <button
+                  type="button"
+                  onClick={clearDayAnchor}
+                  data-testid="button-anchor-reset"
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs hover-elevate"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Back to calendar
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
