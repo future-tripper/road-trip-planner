@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTrip, type PlannerTab } from "@/lib/state";
 import { fetchConditions, type ConditionResult, type ConditionsResponse } from "@/lib/conditions";
 import { conditionPointIdForDay, dayDateLabel, dogWalkWindow, forecastForDay } from "@/lib/forecast";
-import { collectHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS, nwsPointPage, type Hazard } from "@/lib/safety";
+import { collectHazards, dedupeHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS, nwsPointPage, type Hazard } from "@/lib/safety";
 import {
   allDays,
   bookingGuides,
@@ -95,8 +95,11 @@ export function SafetyBanner() {
   const idx = Math.max(0, perDay.findIndex(x => x.day.id === activeDayId));
   // Today's leg and tomorrow's only, so a flood watch 1,500 miles ahead doesn't
   // nag you on Day 1. Anything further out is counted for the "see all" jump.
-  const scoped = perDay.slice(idx, idx + 2).flatMap(x => x.hazards);
-  const aheadCount = perDay.slice(idx + 2).reduce((n, x) => n + x.hazards.length, 0);
+  // Dedup across days: multi-night stays share a weather point (same alert twice).
+  const scoped = dedupeHazards(perDay.slice(idx, idx + 2).flatMap(x => x.hazards));
+  const scopedKeys = new Set(scoped.map(h => `${h.city}:${h.label}`));
+  const aheadCount = dedupeHazards(perDay.slice(idx + 2).flatMap(x => x.hazards))
+    .filter(h => !scopedKeys.has(`${h.city}:${h.label}`)).length;
 
   const sig = scoped.map(h => `${h.city}:${h.label}`).join("|");
   const [dismissed, setDismissed] = useState<string | null>(() => {
@@ -472,9 +475,12 @@ function Tabs({ tab, setTab }: { tab: string; setTab: (t: any) => void }) {
   const { selectedRouteId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const { data } = useQuery<ConditionsResponse>({ queryKey: ["conditions"], queryFn: fetchConditions });
-  // Total active safety hazards on the route — drives a badge on the Live tab so
-  // hazards ahead are discoverable even when the banner (today+tomorrow) is clear.
-  const hazardCount = routeDayHazards(selectedRoute, data?.points ?? []).reduce((n, x) => n + x.hazards.length, 0);
+  // Distinct active safety hazards on the route — drives a badge on the Live tab
+  // so hazards ahead are discoverable even when the banner (today+tomorrow) is
+  // clear. Deduped so a multi-night city's alert isn't counted twice.
+  const hazardCount = dedupeHazards(
+    routeDayHazards(selectedRoute, data?.points ?? []).flatMap(x => x.hazards),
+  ).length;
   const items: { id: any; label: string; testid: string }[] = [
     { id: "drive",  label: "Drive", testid: "tab-drive" },
     { id: "days",   label: "Itinerary", testid: "tab-days" },

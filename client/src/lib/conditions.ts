@@ -131,7 +131,13 @@ function buildResult(
     sunset: asStrings(daily.sunset),
   };
 
-  const activeAlerts: ConditionAlert[] = (alerts?.features ?? []).slice(0, 6).map(feature => ({
+  // Count + severity are read from the FULL alert list; only the displayed list
+  // is capped. Otherwise a Severe/Extreme alert past the 6th (NWS sorts by send
+  // time, not severity) would be dropped and never escalate risk to "high".
+  const allFeatures = alerts?.features ?? [];
+  const alertCount = allFeatures.length;
+  const hasSevereAlert = allFeatures.some(f => ["Extreme", "Severe"].includes(f.properties?.severity ?? ""));
+  const activeAlerts: ConditionAlert[] = allFeatures.slice(0, 6).map(feature => ({
     event: feature.properties?.event ?? "Weather alert",
     severity: feature.properties?.severity,
     headline: feature.properties?.headline,
@@ -145,11 +151,11 @@ function buildResult(
   else if ((feelsLike ?? temp ?? 0) >= 92) riskReasons.push("Heat watch: move outdoor stops to dawn or evening.");
   if ((windMph ?? 0) >= 28) riskReasons.push("High wind may affect mountain/desert driving and dust.");
   if ((uvIndex ?? 0) >= 8) riskReasons.push("High UV: shade, hats, and short exposure windows matter.");
-  if (activeAlerts.length > 0) riskReasons.push(`${activeAlerts.length} active NWS alert${activeAlerts.length === 1 ? "" : "s"} returned.`);
+  if (alertCount > 0) riskReasons.push(`${alertCount} active NWS alert${alertCount === 1 ? "" : "s"} returned.`);
 
   const high =
     riskReasons.some(r => r.includes("Extreme") || r.includes("High wind")) ||
-    activeAlerts.some(a => ["Extreme", "Severe"].includes(a.severity ?? ""));
+    hasSevereAlert;
   const watch = riskReasons.length > 0;
 
   return {

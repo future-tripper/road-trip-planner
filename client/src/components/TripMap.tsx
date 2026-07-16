@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useTrip } from "@/lib/state";
@@ -45,12 +45,15 @@ export function TripMap() {
   const selectedDays = selectedRoute.dayIds
     .map(id => allDays.find(d => d.id === id))
     .filter((d): d is Day => !!d);
-  const selectedStops = (() => {
+  // Memoized so the marker effect only rebuilds when the route's stops actually
+  // change — not on every unrelated re-render (which would tear down an open popup).
+  const selectedStops = useMemo(() => {
     const orderedIds: string[] = [];
     const seen = new Set<string>();
     selectedDays.forEach(d => d.stopIds.forEach(id => { if (!seen.has(id)) { seen.add(id); orderedIds.push(id); } }));
     return orderedIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
-  })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoute]);
 
   // Keep the latest route stops / active day reachable from the mount-only effect.
   const selectedStopsRef = useRef(selectedStops);
@@ -58,6 +61,7 @@ export function TripMap() {
   const activeDayIdRef = useRef(activeDayId);
   activeDayIdRef.current = activeDayId;
   const didFitRef = useRef(false);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
   // mount
   useEffect(() => {
@@ -112,7 +116,11 @@ export function TripMap() {
       }
     });
     ro.observe(containerRef.current);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      map.remove(); // tear down Leaflet's document/window listeners so nothing leaks
+      mapRef.current = null;
+    };
   }, []);
 
   // Render markers + lines whenever inputs change
@@ -120,6 +128,7 @@ export function TripMap() {
     const map = mapRef.current; const layer = layerRef.current;
     if (!map || !layer) return;
     layer.clearLayers();
+    markersRef.current.clear();
 
     // overall dashed line
     if (fullLineRef.current) { fullLineRef.current.remove(); }
@@ -188,11 +197,16 @@ export function TripMap() {
         btn?.addEventListener("click", () => { toggleSaved(s.id); marker.closePopup(); });
       });
       marker.addTo(layer);
+      markersRef.current.set(s.id, marker);
     });
-    // NOTE: no fitBounds here — this effect re-runs on every render (selectedStops
-    // is rebuilt each time), so refitting would fight the day-pan and zoom the map
-    // back out whenever the component re-renders (e.g. the mobile Map/Planner
-    // toggle). Framing is owned by the initial-fit observer and the day-pan effect.
+    // Re-open the selected place's popup. Rebuilding the layer above closes any
+    // open popup, so without this a marker click (which selects the place and
+    // triggers this re-run) would flash its popup shut. Idempotent on re-runs.
+    const selId = selectedPlaceId ?? activeStopId;
+    if (selId) markersRef.current.get(selId)?.openPopup();
+    // NOTE: no fitBounds here — this effect re-runs when selectedStops / the day
+    // changes; refitting would fight the day-pan and zoom the map back out.
+    // Framing is owned by the initial-fit observer and the day-pan effect.
   }, [selectedStops, selectedRoute, activeDayId, activeStopId, selectedPlaceId, saved, setActiveStopId, setSelectedPlaceId, toggleSaved]);
 
   // pan to active day

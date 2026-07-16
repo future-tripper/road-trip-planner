@@ -14,7 +14,7 @@ export interface Hazard {
 const MATCHERS: { kind: Hazard["kind"]; re: RegExp }[] = [
   { kind: "tornado", re: /tornado/i },
   { kind: "flood", re: /flood/i },
-  { kind: "fire", re: /red flag|fire weather/i },
+  { kind: "fire", re: /red flag|fire weather|fire warning/i },
   { kind: "storm", re: /severe thunderstorm/i },
 ];
 
@@ -69,6 +69,19 @@ export function collectHazards(points: ConditionResult[]): Hazard[] {
 export interface AqiBand {
   label: string;
   level: "good" | "moderate" | "usg" | "unhealthy" | "veryUnhealthy" | "hazardous";
+}
+
+// Two adjacent days can resolve to the SAME weather point (any multi-night
+// stay), which would otherwise list/count the identical alert twice. Dedup by
+// city+event across a combined list.
+export function dedupeHazards(hazards: Hazard[]): Hazard[] {
+  const seen = new Set<string>();
+  return hazards.filter(h => {
+    const key = `${h.city}:${h.label}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export function aqiBand(aqi: number | null | undefined): AqiBand | null {
