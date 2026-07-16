@@ -14,6 +14,20 @@ export interface ConditionAlert {
   expires?: string;
 }
 
+// Parallel per-date arrays from the rolling 16-day forecast, so the UI can
+// read the forecast for the date the family will actually be at each city.
+export interface DailyForecast {
+  dates: string[];        // "2026-07-22", …
+  max: (number | null)[];
+  min: (number | null)[];
+  feelsMax: (number | null)[];
+  precip: (number | null)[];
+  uv: (number | null)[];
+  windMax: (number | null)[];
+  sunrise: (string | null)[];
+  sunset: (string | null)[];
+}
+
 export interface ConditionResult {
   id: string;
   name: string;
@@ -29,6 +43,7 @@ export interface ConditionResult {
     precipitationProbability?: number | null;
     uvIndex?: number | null;
   };
+  daily?: DailyForecast;
   alerts: ConditionAlert[];
   wildfire?: {
     nearbyCount: number;
@@ -66,7 +81,7 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 
 interface OpenMeteoForecast {
   current?: Record<string, number>;
-  daily?: Record<string, number[]>;
+  daily?: Record<string, (number | string)[]>;
 }
 
 interface NwsAlerts {
@@ -87,6 +102,22 @@ function buildResult(
   const dailyMin = round(daily.temperature_2m_min?.[0]);
   const precipitationProbability = round(daily.precipitation_probability_max?.[0]);
   const uvIndex = round(daily.uv_index_max?.[0]);
+
+  const asStrings = (v: (number | string)[] | undefined): (string | null)[] =>
+    (v ?? []).map(x => (typeof x === "string" ? x : null));
+  const asNums = (v: (number | string)[] | undefined): (number | null)[] =>
+    (v ?? []).map(round);
+  const dailyForecast: DailyForecast = {
+    dates: (daily.time ?? []).map(x => String(x)),
+    max: asNums(daily.temperature_2m_max),
+    min: asNums(daily.temperature_2m_min),
+    feelsMax: asNums(daily.apparent_temperature_max),
+    precip: asNums(daily.precipitation_probability_max),
+    uv: asNums(daily.uv_index_max),
+    windMax: asNums(daily.wind_speed_10m_max),
+    sunrise: asStrings(daily.sunrise),
+    sunset: asStrings(daily.sunset),
+  };
 
   const activeAlerts: ConditionAlert[] = (alerts?.features ?? []).slice(0, 6).map(feature => ({
     event: feature.properties?.event ?? "Weather alert",
@@ -123,6 +154,7 @@ function buildResult(
       precipitationProbability,
       uvIndex,
     },
+    daily: dailyForecast,
     alerts: activeAlerts,
     wildfire: {
       nearbyCount: 0,
@@ -139,7 +171,7 @@ export async function fetchConditions(): Promise<ConditionsResponse> {
   weatherUrl.searchParams.set("latitude", conditionPoints.map(p => p.lat).join(","));
   weatherUrl.searchParams.set("longitude", conditionPoints.map(p => p.lng).join(","));
   weatherUrl.searchParams.set("current", "temperature_2m,apparent_temperature,wind_speed_10m,weather_code");
-  weatherUrl.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,uv_index_max");
+  weatherUrl.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,wind_speed_10m_max,uv_index_max,sunrise,sunset");
   weatherUrl.searchParams.set("temperature_unit", "fahrenheit");
   weatherUrl.searchParams.set("wind_speed_unit", "mph");
   weatherUrl.searchParams.set("timezone", "auto");

@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTrip } from "@/lib/state";
 import { fetchConditions, type ConditionResult, type ConditionsResponse } from "@/lib/conditions";
+import { conditionPointIdForDay, dogWalkWindow, forecastForDay } from "@/lib/forecast";
 import {
   allDays,
   bookingGuides,
-  conditionPoints,
   hotels,
   routes,
   stops,
@@ -399,6 +399,7 @@ function googleMapsSearch(query: string) {
 
 function DrivePane() {
   const { activeDayId, setActiveDayId, selectedRouteId, selectedPlaceId } = useTrip();
+  const { data: conditions } = useQuery<ConditionsResponse>({ queryKey: ["conditions"], queryFn: fetchConditions });
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const daysForRoute = routeDays(selectedRoute);
   const selectedDay = daysForRoute.find(d => d.id === activeDayId) ?? daysForRoute[0];
@@ -427,6 +428,16 @@ function DrivePane() {
       </div>
     );
   }
+
+  const condPointId = conditionPointIdForDay(selectedDay);
+  const condPoint = condPointId ? conditions?.points.find(p => p.id === condPointId) : undefined;
+  const dayForecast = forecastForDay(condPoint, selectedDay);
+  const walkWindow = dogWalkWindow(dayForecast);
+  const forecastBorder = {
+    low: "border-border bg-background/60",
+    watch: "border-accent/40 bg-accent/10",
+    high: "border-[hsl(6_64%_42%/_.4)] bg-[hsl(6_64%_42%/_.1)]",
+  } as const;
 
   return (
     <div>
@@ -464,6 +475,25 @@ function DrivePane() {
             <p className="mt-2 rounded border border-accent/30 bg-accent/10 p-2 text-xs text-foreground/85">
               {selectedDay.weatherNote}
             </p>
+          )}
+          {dayForecast && (
+            <div className={`mt-2 rounded-md border p-2 ${forecastBorder[dayForecast.risk]}`} data-testid="drive-forecast">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-medium">{dayForecast.label} in {selectedDay.hotelCity}</span>
+                <span className="tabular-nums">
+                  {dayForecast.max ?? "—"}° / {dayForecast.min ?? "—"}°{dayForecast.feelsMax != null ? ` · feels ${dayForecast.feelsMax}°` : ""}
+                </span>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                <span>{dayForecast.precip ?? "—"}% rain</span>
+                <span>UV {dayForecast.uv ?? "—"}</span>
+                <span>{dayForecast.windMax ?? "—"} mph wind</span>
+              </div>
+              {walkWindow && <p className="mt-1 text-[11px] text-muted-foreground">{walkWindow}</p>}
+              {dayForecast.reasons[0] && (
+                <p className="mt-1 text-[11px] font-medium text-foreground/85">{dayForecast.reasons[0]}</p>
+              )}
+            </div>
           )}
           <div className="mt-3">
             <a
@@ -1208,14 +1238,14 @@ function BookingSection({ title, Icon, items, city, testid }: { title: string; I
 function ConditionsPane() {
   const { selectedRouteId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
-  const activePointIds = new Set(conditionPoints.filter(p => p.routeIds.includes(selectedRoute.id)).map(p => p.id));
   // Conditions are fetched directly from public weather APIs in the browser —
   // no backend involved, so this works on a fully static deployment.
   const { data, isLoading, error, refetch, isFetching } = useQuery<ConditionsResponse>({
     queryKey: ["conditions"],
     queryFn: fetchConditions,
   });
-  const points = (data?.points ?? []).filter(p => activePointIds.has(p.id));
+  const daysForRoute = routeDays(selectedRoute);
+  const pointById = new Map((data?.points ?? []).map(p => [p.id, p]));
   return (
     <div>
       <div className="border-b border-border bg-accent/10 p-3 text-xs text-foreground" data-testid="conditions-note">
@@ -1252,12 +1282,10 @@ function ConditionsPane() {
       )}
       {!isLoading && !error && (
         <ul className="space-y-2 p-3" role="list">
-          {points.map(point => <ConditionCard key={point.id} point={point} />)}
-          {points.length === 0 && (
-            <li className="rounded-md border border-dashed border-border px-3 py-8 text-center text-xs text-muted-foreground">
-              No live condition points are mapped to this route yet.
-            </li>
-          )}
+          {daysForRoute.map(day => {
+            const pid = conditionPointIdForDay(day);
+            return <DayConditionCard key={day.id} day={day} point={pid ? pointById.get(pid) : undefined} />;
+          })}
         </ul>
       )}
       <div className="border-t border-border p-3 text-[11px] text-muted-foreground">
@@ -1267,53 +1295,72 @@ function ConditionsPane() {
   );
 }
 
-function ConditionCard({ point }: { point: ConditionResult }) {
-  const weather = point.weather;
+function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult }) {
+  const f = forecastForDay(point, day);
+  const walk = dogWalkWindow(f);
+  const risk = f?.risk ?? "low";
+  const nowTemp = point?.weather?.temperature;
+  const alerts = point?.alerts ?? [];
   const riskStyles = {
     low: "bg-[hsl(148_36%_22%/_.12)] text-[hsl(148_36%_22%)] dark:bg-[hsl(148_28%_56%/_.18)] dark:text-[hsl(148_28%_72%)]",
     watch: "bg-[hsl(38_60%_52%/_.18)] text-[hsl(34_65%_30%)] dark:bg-[hsl(38_64%_60%/_.18)] dark:text-[hsl(38_64%_72%)]",
     high: "bg-[hsl(6_64%_42%/_.14)] text-[hsl(6_64%_34%)] dark:bg-[hsl(6_62%_56%/_.18)] dark:text-[hsl(6_62%_74%)]",
   } as const;
   return (
-    <li className="rounded-md border border-card-border bg-card p-3" data-testid={`condition-card-${point.id}`}>
+    <li className="rounded-md border border-card-border bg-card p-3" data-testid={`condition-card-${day.id}`}>
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-serif text-base font-semibold leading-tight">{point.name}</h3>
-          <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><CloudSun className="h-3 w-3" /> {weather?.temperature ?? "—"}°F now</span>
-            <span className="inline-flex items-center gap-1"><Sun className="h-3 w-3" /> high {weather?.dailyMax ?? "—"}°</span>
-            <span className="inline-flex items-center gap-1"><Wind className="h-3 w-3" /> {weather?.windMph ?? "—"} mph</span>
-          </div>
+        <div className="min-w-0">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Day {day.num} · {f?.label ?? "date TBD"}</div>
+          <h3 className="mt-0.5 font-serif text-base font-semibold leading-tight">{day.hotelCity}</h3>
         </div>
-        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${riskStyles[point.risk]}`}>
-          {point.risk === "low" ? "clear" : point.risk}
-        </span>
+        {f && (
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${riskStyles[risk]}`}>
+            {risk === "low" ? "clear" : risk}
+          </span>
+        )}
       </div>
-      {point.riskReasons.length > 0 && (
-        <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-foreground/85">
-          {point.riskReasons.map(reason => <li key={reason}>{reason}</li>)}
-        </ul>
+      {f ? (
+        <>
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground/85">
+            <span className="inline-flex items-center gap-1 tabular-nums">
+              <Sun className="h-3 w-3" /> {f.max ?? "—"}° / {f.min ?? "—"}°{f.feelsMax != null ? ` · feels ${f.feelsMax}°` : ""}
+            </span>
+            <span className="inline-flex items-center gap-1 tabular-nums"><CloudSun className="h-3 w-3" /> {f.precip ?? "—"}% rain</span>
+            <span className="inline-flex items-center gap-1 tabular-nums"><Sun className="h-3 w-3" /> UV {f.uv ?? "—"}</span>
+            <span className="inline-flex items-center gap-1 tabular-nums"><Wind className="h-3 w-3" /> {f.windMax ?? "—"} mph</span>
+          </div>
+          {walk && <p className="mt-1.5 text-[11px] text-muted-foreground">{walk}</p>}
+          {f.reasons.length > 0 && (
+            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-foreground/85">
+              {f.reasons.map(reason => <li key={reason}>{reason}</li>)}
+            </ul>
+          )}
+        </>
+      ) : (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Forecast opens as this date enters the 16-day window{nowTemp != null ? ` · ${nowTemp}° near ${day.hotelCity} right now` : ""}.
+        </p>
       )}
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded border border-border bg-background/60 p-2">
           <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-            <AlertTriangle className="h-3 w-3" /> NWS alerts
+            <AlertTriangle className="h-3 w-3" /> NWS alerts (now)
           </div>
           <p className="mt-1 text-xs text-foreground/85">
-            {point.alerts.length > 0 ? point.alerts.slice(0, 2).map(a => a.event).join(", ") : "No active alerts returned."}
+            {alerts.length > 0 ? alerts.slice(0, 2).map(a => a.event).join(", ") : "No active alerts."}
           </p>
         </div>
         <a
-          href={point.wildfire?.link ?? "https://www.nifc.gov/fire-information/maps"}
+          href={point?.wildfire?.link ?? "https://www.nifc.gov/fire-information/maps"}
           target="_blank"
           rel="noopener noreferrer"
-          data-testid={`link-wildfire-${point.id}`}
+          data-testid={`link-wildfire-${day.id}`}
           className="rounded border border-border bg-background/60 p-2 text-left hover-elevate"
         >
           <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
             <Flame className="h-3 w-3" /> Wildfire map
           </div>
-          <p className="mt-1 text-xs text-foreground/85">{point.wildfire?.note ?? "Open NIFC fire maps before final booking."}</p>
+          <p className="mt-1 text-xs text-foreground/85">{point?.wildfire?.note ?? "Open NIFC fire maps before final booking."}</p>
         </a>
       </div>
     </li>
