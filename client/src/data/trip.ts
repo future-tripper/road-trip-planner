@@ -36,6 +36,7 @@ export type Category =
   | "overnight"
   | "dog-park"
   | "photo-stop"
+  | "cafe"
   | "city";
 
 export interface Stop {
