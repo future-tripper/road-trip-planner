@@ -19,7 +19,7 @@ import {
   Bone, Mountain, Sparkles, Trees, Bed, UtensilsCrossed, Baby, Clock,
   Sun, X, ExternalLink, Check, Plus, ChevronRight, MapPin, Trash2, Hotel,
   Flame, CloudSun, AlertTriangle, Wind, RefreshCw, Dog, Martini, MapPinned, CarFront,
-  CalendarClock,
+  ChevronDown,
 } from "lucide-react";
 
 const TAG_DEFS: { tag: Tag; label: string; Icon: any }[] = [
@@ -255,7 +255,9 @@ function JumpChip({ onClick, testid, Icon, label }: { onClick: () => void; testi
 
 function RouteSwitcher() {
   const { selectedRouteId, setSelectedRouteId, setActiveDayId } = useTrip();
-  const [expanded, setExpanded] = useState(false);
+  // Collapsed on phones so the day fills the screen; always open on desktop (lg).
+  const [open, setOpen] = useState(false);
+  const [notes, setNotes] = useState(false);
   const active = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const colorFor = (color?: string) => {
     if (color === "purple") return "hsl(276 34% 42%)";
@@ -263,76 +265,93 @@ function RouteSwitcher() {
     return "hsl(200 40% 38%)";
   };
   return (
-    <div className="shrink-0 border-b border-border p-3">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Choose route</div>
-          <div className="mt-0.5 text-sm font-semibold" data-testid="text-selected-route-compact">{active.name}</div>
+    <div className="shrink-0 border-b border-border">
+      {/* Compact header — tap to expand on mobile; the route picker is always open on desktop */}
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        data-testid="button-toggle-route-picker"
+        className="flex w-full items-center justify-between gap-3 p-3 text-left hover-elevate lg:pointer-events-none"
+      >
+        <div className="min-w-0">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Route</div>
+          <div className="mt-0.5 flex items-center gap-2 text-sm font-semibold" data-testid="text-selected-route-compact">
+            <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colorFor(active.color) }} />
+            <span className="truncate">{active.name}</span>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setExpanded(v => !v)}
-          data-testid="button-toggle-route-details"
-          aria-expanded={expanded}
-          className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs hover-elevate"
-        >
-          {expanded ? "Hide route notes" : "Route notes"}
-        </button>
-      </div>
-      <div className="mt-2 grid gap-2 sm:grid-cols-2" data-testid="route-comparison-list">
-        {routes.map(route => {
-          const selected = selectedRouteId === route.id;
-          return (
-            <button
-              key={route.id}
-              type="button"
-              onClick={() => {
-                setSelectedRouteId(route.id);
-                setActiveDayId(route.dayIds[0] ?? null);
-              }}
-              data-testid={`button-route-${route.id}`}
-              className={`rounded-md border px-3 py-2 text-left hover-elevate ${
-                selected ? "border-primary bg-primary/10" : "border-border bg-background"
-              }`}
-              aria-pressed={selected}
-            >
-              <div className="flex items-start gap-2">
-                <span className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colorFor(route.color) }} />
-                <span className="min-w-0 whitespace-normal font-sans text-[13px] font-semibold leading-snug tracking-normal">{route.name}</span>
-              </div>
-              <div className="mt-0.5 text-[11px] text-muted-foreground">{route.tagline}</div>
-            </button>
-          );
-        })}
-      </div>
-      {active && (
-        <div className="mt-2 rounded-md border border-border bg-background/70 p-2.5" data-testid="text-alt-route-blurb">
-          {!expanded && (
-            <p className="line-clamp-2 text-xs text-foreground/85">
-              {active.recommendation ?? active.description}
-            </p>
-          )}
-          {expanded && (
-            <>
-              <p className="text-xs text-foreground/85">{active.description}</p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <RouteMiniList title="Why it works" items={active.strengths ?? []} />
-                <RouteMiniList title="Watch-outs" items={active.cautions ?? []} />
-              </div>
-              {active.recommendation && (
-                <p className="mt-3 rounded border border-accent/30 bg-accent/10 px-2 py-1.5 text-xs text-foreground">
-                  <strong>Assessment:</strong> {active.recommendation}
-                </p>
-              )}
-              {active.overnightCities && (
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Overnight anchors: {active.overnightCities.join(" → ")}
-                </p>
-              )}
-            </>
-          )}
+        <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground lg:hidden">
+          {open ? "Done" : "Change"}
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+        </span>
+      </button>
+
+      {/* Route cards + notes: hidden on mobile until expanded, always shown on desktop */}
+      <div className={`${open ? "block" : "hidden"} px-3 pb-3 lg:block`}>
+        <div className="grid gap-2 sm:grid-cols-2" data-testid="route-comparison-list">
+          {routes.map(route => {
+            const selected = selectedRouteId === route.id;
+            return (
+              <button
+                key={route.id}
+                type="button"
+                onClick={() => {
+                  setSelectedRouteId(route.id);
+                  setActiveDayId(route.dayIds[0] ?? null);
+                }}
+                data-testid={`button-route-${route.id}`}
+                className={`rounded-md border px-3 py-2 text-left hover-elevate ${
+                  selected ? "border-primary bg-primary/10" : "border-border bg-background"
+                }`}
+                aria-pressed={selected}
+              >
+                <div className="flex items-start gap-2">
+                  <span className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colorFor(route.color) }} />
+                  <span className="min-w-0 whitespace-normal font-sans text-[13px] font-semibold leading-snug tracking-normal">{route.name}</span>
+                </div>
+                <div className="mt-0.5 text-[11px] text-muted-foreground">{route.tagline}</div>
+              </button>
+            );
+          })}
         </div>
-      )}
+        {active && (
+          <div className="mt-2 rounded-md border border-border bg-background/70 p-2.5" data-testid="text-alt-route-blurb">
+            <div className="flex items-start justify-between gap-2">
+              <p className={`text-xs text-foreground/85 ${notes ? "" : "line-clamp-2"}`}>
+                {notes ? active.description : (active.recommendation ?? active.description)}
+              </p>
+              <button
+                type="button"
+                onClick={() => setNotes(v => !v)}
+                data-testid="button-toggle-route-details"
+                aria-expanded={notes}
+                className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[11px] hover-elevate"
+              >
+                {notes ? "Less" : "More"}
+              </button>
+            </div>
+            {notes && (
+              <>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <RouteMiniList title="Why it works" items={active.strengths ?? []} />
+                  <RouteMiniList title="Watch-outs" items={active.cautions ?? []} />
+                </div>
+                {active.recommendation && (
+                  <p className="mt-3 rounded border border-accent/30 bg-accent/10 px-2 py-1.5 text-xs text-foreground">
+                    <strong>Assessment:</strong> {active.recommendation}
+                  </p>
+                )}
+                {active.overnightCities && (
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    Overnight anchors: {active.overnightCities.join(" → ")}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -379,7 +398,7 @@ function googleMapsSearch(query: string) {
 }
 
 function DrivePane() {
-  const { activeDayId, setActiveDayId, selectedRouteId, selectedPlaceId, dayAnchor, anchorToday, clearDayAnchor } = useTrip();
+  const { activeDayId, setActiveDayId, selectedRouteId, selectedPlaceId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const daysForRoute = routeDays(selectedRoute);
   const selectedDay = daysForRoute.find(d => d.id === activeDayId) ?? daysForRoute[0];
@@ -408,8 +427,6 @@ function DrivePane() {
       </div>
     );
   }
-
-  const anchoredDay = dayAnchor ? daysForRoute.find(d => d.id === dayAnchor.dayId) : undefined;
 
   return (
     <div>
@@ -448,24 +465,15 @@ function DrivePane() {
               {selectedDay.weatherNote}
             </p>
           )}
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <a
-              href={googleMapsSearch(`${selectedDay.from} to ${selectedDay.to}`)}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="link-drive-route-map"
-              className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-background px-2 py-2 text-xs font-medium hover-elevate"
-            >
-              <CarFront className="h-3.5 w-3.5" /> Map drive
-            </a>
+          <div className="mt-3">
             <a
               href={googleMapsSearch(`${selectedDay.hotelCity} pet friendly hotel`)}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="link-drive-hotel-map"
-              className="inline-flex items-center justify-center gap-1 rounded-md border border-border bg-background px-2 py-2 text-xs font-medium hover-elevate"
+              className="inline-flex w-full items-center justify-center gap-1 rounded-md border border-border bg-background px-2 py-2 text-xs font-medium hover-elevate"
             >
-              <Hotel className="h-3.5 w-3.5" /> Hotel map
+              <Hotel className="h-3.5 w-3.5" /> Search hotels tonight
             </a>
           </div>
           <div className="mt-3 flex items-center justify-between gap-2">
@@ -498,36 +506,6 @@ function DrivePane() {
             >
               Next day
             </button>
-          </div>
-          <div className="mt-3 rounded-md border border-border bg-muted/30 p-2.5" data-testid="drive-anchor-control">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              <CalendarClock className="h-3.5 w-3.5" /> Trip tracking
-            </div>
-            <p className="mt-1 text-xs text-foreground/85">
-              {anchoredDay
-                ? <>Set to <strong>Day {anchoredDay.num}</strong> as your real position — mornings now open from here, not the calendar.</>
-                : <>The app opens on today's calendar day. Off schedule? Anchor the day you're really driving and it re-syncs from there.</>}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => anchorToday(selectedDay.id)}
-                data-testid="button-anchor-today"
-                className="inline-flex items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2.5 py-1.5 text-xs font-medium hover-elevate"
-              >
-                <MapPin className="h-3.5 w-3.5" /> We're on Day {selectedDay.num} today
-              </button>
-              {anchoredDay && (
-                <button
-                  type="button"
-                  onClick={clearDayAnchor}
-                  data-testid="button-anchor-reset"
-                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs hover-elevate"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" /> Back to calendar
-                </button>
-              )}
-            </div>
           </div>
         </section>
 

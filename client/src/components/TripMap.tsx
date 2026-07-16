@@ -52,6 +52,13 @@ export function TripMap() {
     return orderedIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
   })();
 
+  // Keep the latest route stops / active day reachable from the mount-only effect.
+  const selectedStopsRef = useRef(selectedStops);
+  selectedStopsRef.current = selectedStops;
+  const activeDayIdRef = useRef(activeDayId);
+  activeDayIdRef.current = activeDayId;
+  const didFitRef = useRef(false);
+
   // mount
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -75,9 +82,37 @@ export function TripMap() {
     altLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
-    // Fit overall route
-    const bounds = L.latLngBounds(stops.filter(s => ["north-branford-ct","del-mar-ca"].includes(s.id)).map(s => [s.lat, s.lng] as [number, number]));
-    map.fitBounds(bounds.pad(0.08));
+    // On phones the flex/100dvh layout (and the Map/Planner tab toggle) can leave
+    // the container mis-sized when Leaflet first measures it, so it renders at
+    // world zoom. Recompute size whenever the container gets real dimensions, and
+    // the first time it does, fit to today's leg (falling back to the whole route).
+    const fitInitial = () => {
+      const day = activeDayIdRef.current ? allDays.find(d => d.id === activeDayIdRef.current) : undefined;
+      const dayPts = day
+        ? (day.stopIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[])
+        : [];
+      if (dayPts.length > 1) {
+        map.fitBounds(L.latLngBounds(dayPts.map(s => [s.lat, s.lng] as [number, number])).pad(0.4), { animate: false });
+      } else if (dayPts.length === 1) {
+        map.setView([dayPts[0].lat, dayPts[0].lng], 9, { animate: false });
+      } else if (selectedStopsRef.current.length > 1) {
+        map.fitBounds(L.latLngBounds(selectedStopsRef.current.map(s => [s.lat, s.lng] as [number, number])).pad(0.08), { animate: false });
+      }
+    };
+    const ro = new ResizeObserver(() => {
+      const el = containerRef.current;
+      if (!el || el.clientWidth < 80 || el.clientHeight < 80) return;
+      map.invalidateSize();
+      if (!didFitRef.current) {
+        didFitRef.current = true;
+        // Defer a frame: fitting synchronously here gets clobbered by Leaflet's
+        // deferred initial-view application. didFitRef is set now so the day-pan
+        // effect owns framing for any later day change.
+        requestAnimationFrame(fitInitial);
+      }
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
   }, []);
 
   // Render markers + lines whenever inputs change
@@ -154,14 +189,19 @@ export function TripMap() {
       });
       marker.addTo(layer);
     });
-    if (selectedStops.length > 1) {
-      map.fitBounds(L.latLngBounds(selectedStops.map(s => [s.lat, s.lng])).pad(0.08), { animate: true });
-    }
+    // NOTE: no fitBounds here — this effect re-runs on every render (selectedStops
+    // is rebuilt each time), so refitting would fight the day-pan and zoom the map
+    // back out whenever the component re-renders (e.g. the mobile Map/Planner
+    // toggle). Framing is owned by the initial-fit observer and the day-pan effect.
   }, [selectedStops, selectedRoute, activeDayId, activeStopId, selectedPlaceId, saved, setActiveStopId, setSelectedPlaceId, toggleSaved]);
 
   // pan to active day
   useEffect(() => {
     const map = mapRef.current; if (!map || !activeDayId) return;
+    // Hold off until the container has been measured and framed once (see the
+    // initial-fit observer). Animating before that runs against a mis-sized map
+    // and lands at the wrong zoom; the observer owns the first frame.
+    if (!didFitRef.current) return;
     const day = allDays.find(d => d.id === activeDayId); if (!day || day.stopIds.length === 0) return;
     const pts = day.stopIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
     if (pts.length === 0) return;
