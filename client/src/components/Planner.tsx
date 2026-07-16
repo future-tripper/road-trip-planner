@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTrip } from "@/lib/state";
 import { fetchConditions, type ConditionResult, type ConditionsResponse } from "@/lib/conditions";
 import { conditionPointIdForDay, dogWalkWindow, forecastForDay } from "@/lib/forecast";
+import { collectHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS } from "@/lib/safety";
 import {
   allDays,
   bookingGuides,
@@ -69,6 +70,58 @@ export function Planner() {
         {tab === "saved" && <SavedPane />}
       </div>
     </aside>
+  );
+}
+
+// Can't-miss banner: scans every weather point on the selected route for the
+// alerts the family fears most (tornado, flood, fire) plus unhealthy smoke, and
+// surfaces them above everything. Renders nothing when the route is clear.
+export function SafetyBanner() {
+  const { selectedRouteId } = useTrip();
+  const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
+  const { data } = useQuery<ConditionsResponse>({ queryKey: ["conditions"], queryFn: fetchConditions });
+  const pointIds = new Set(
+    routeDays(selectedRoute).map(d => conditionPointIdForDay(d)).filter((id): id is string => !!id),
+  );
+  const hazards = collectHazards((data?.points ?? []).filter(p => pointIds.has(p.id)));
+  if (hazards.length === 0) return null;
+  const anyWarning = hazards.some(h => h.severity === "warning");
+  return (
+    <div
+      role="alert"
+      data-testid="safety-banner"
+      className={`shrink-0 border-b px-3 py-2 ${
+        anyWarning
+          ? "border-[hsl(6_64%_42%/_.5)] bg-[hsl(6_64%_42%/_.14)] text-[hsl(6_64%_30%)] dark:text-[hsl(6_72%_80%)]"
+          : "border-accent/50 bg-accent/15 text-foreground"
+      }`}
+    >
+      <div className="mx-auto flex max-w-5xl items-start gap-2">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="min-w-0 text-xs">
+          <div className="font-semibold">
+            {anyWarning ? "Active safety warning on your route" : "Safety watch on your route"}
+          </div>
+          <ul className="mt-1 space-y-0.5">
+            {hazards.slice(0, 4).map((h, i) => (
+              <li key={`${h.city}-${h.label}-${i}`} className="truncate">
+                <span aria-hidden>{HAZARD_EMOJI[h.kind]}</span>{" "}
+                {h.url ? (
+                  <a href={h.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                    {h.label} — {h.city}
+                  </a>
+                ) : (
+                  <>{h.label} — {h.city}</>
+                )}
+              </li>
+            ))}
+            {hazards.length > 4 && (
+              <li className="text-[11px] opacity-80">+{hazards.length - 4} more — see the Live tab</li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1265,6 +1318,31 @@ function ConditionsPane() {
           <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} /> Refresh
         </button>
       </div>
+      <div className="border-b border-border p-3" data-testid="outlook-links">
+        <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          <AlertTriangle className="h-3.5 w-3.5" /> Days-ahead risk outlooks
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Official forecasts of tornado, flood, and fire risk before warnings are issued — check the morning of and the night before.
+        </p>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {OUTLOOK_LINKS.map(link => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-xs hover-elevate"
+            >
+              <span className="min-w-0">
+                <span className="block font-medium leading-tight">{link.label}</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{link.detail}</span>
+              </span>
+              <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            </a>
+          ))}
+        </div>
+      </div>
       {isLoading && (
         <div className="space-y-2 p-3" data-testid="conditions-loading">
           {[0, 1, 2, 3].map(i => (
@@ -1341,6 +1419,25 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
           Forecast opens as this date enters the 16-day window{nowTemp != null ? ` · ${nowTemp}° near ${day.hotelCity} right now` : ""}.
         </p>
       )}
+      {(() => {
+        const aqi = point?.airQuality?.usAqi;
+        const band = aqiBand(aqi);
+        if (aqi == null || !band) return null;
+        const aqiColor = {
+          good: "text-[hsl(148_40%_34%)]",
+          moderate: "text-[hsl(42_72%_36%)] dark:text-[hsl(42_74%_62%)]",
+          usg: "text-[hsl(28_82%_44%)] dark:text-[hsl(28_84%_62%)]",
+          unhealthy: "text-[hsl(6_66%_44%)] dark:text-[hsl(6_72%_68%)]",
+          veryUnhealthy: "text-[hsl(300_46%_46%)] dark:text-[hsl(300_50%_70%)]",
+          hazardous: "text-[hsl(0_62%_38%)] dark:text-[hsl(0_66%_66%)]",
+        }[band.level];
+        return (
+          <p className="mt-1.5 text-[11px]">
+            <span className="text-muted-foreground">Air now: </span>
+            <span className={`font-medium ${aqiColor}`}>{band.label} · AQI {aqi}</span>
+          </p>
+        );
+      })()}
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded border border-border bg-background/60 p-2">
           <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">

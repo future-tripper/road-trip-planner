@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TripMap } from "@/components/TripMap";
-import { Planner } from "@/components/Planner";
+import { Planner, SafetyBanner } from "@/components/Planner";
 import { Logo } from "@/components/Logo";
 import { useTrip } from "@/lib/state";
 import { allDays, routes } from "@/data/julyTrip";
@@ -68,6 +68,8 @@ export default function Home() {
           <ListChecks className="h-4 w-4" /> Planner
         </button>
       </div>
+
+      <SafetyBanner />
 
       <main className="flex flex-1 min-h-0 overflow-hidden">
         <section

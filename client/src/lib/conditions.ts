@@ -12,6 +12,7 @@ export interface ConditionAlert {
   headline?: string;
   areaDesc?: string;
   expires?: string;
+  url?: string;
 }
 
 // Parallel per-date arrays from the rolling 16-day forecast, so the UI can
@@ -44,6 +45,12 @@ export interface ConditionResult {
     uvIndex?: number | null;
   };
   daily?: DailyForecast;
+  // Current (not forecast — the AQI feed only runs a few days out) air quality,
+  // used as a real-time wildfire-smoke read.
+  airQuality?: {
+    usAqi: number | null;
+    pm25: number | null;
+  };
   alerts: ConditionAlert[];
   wildfire?: {
     nearbyCount: number;
@@ -85,13 +92,18 @@ interface OpenMeteoForecast {
 }
 
 interface NwsAlerts {
-  features?: Array<{ properties?: Record<string, string> }>;
+  features?: Array<{ id?: string; properties?: Record<string, string> }>;
+}
+
+interface AirQualityResponse {
+  current?: { us_aqi?: number; pm2_5?: number };
 }
 
 function buildResult(
   point: (typeof conditionPoints)[number],
   weather: OpenMeteoForecast | undefined,
   alerts: NwsAlerts | null,
+  air: AirQualityResponse | undefined,
 ): ConditionResult {
   const current = weather?.current ?? {};
   const daily = weather?.daily ?? {};
@@ -125,6 +137,7 @@ function buildResult(
     headline: feature.properties?.headline,
     areaDesc: feature.properties?.areaDesc,
     expires: feature.properties?.expires,
+    url: feature.id ?? feature.properties?.["@id"],
   }));
 
   const riskReasons: string[] = [];
@@ -155,6 +168,10 @@ function buildResult(
       uvIndex,
     },
     daily: dailyForecast,
+    airQuality: {
+      usAqi: round(air?.current?.us_aqi),
+      pm25: round(air?.current?.pm2_5),
+    },
     alerts: activeAlerts,
     wildfire: {
       nearbyCount: 0,
@@ -177,8 +194,17 @@ export async function fetchConditions(): Promise<ConditionsResponse> {
   weatherUrl.searchParams.set("timezone", "auto");
   weatherUrl.searchParams.set("forecast_days", "16");
 
-  const [weatherRaw, ...alertsList] = await Promise.all([
+  // Batched current air quality (one request), same multi-location shape as the
+  // weather call. Used as a real-time wildfire-smoke read.
+  const airUrl = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
+  airUrl.searchParams.set("latitude", conditionPoints.map(p => p.lat).join(","));
+  airUrl.searchParams.set("longitude", conditionPoints.map(p => p.lng).join(","));
+  airUrl.searchParams.set("current", "us_aqi,pm2_5");
+  airUrl.searchParams.set("timezone", "auto");
+
+  const [weatherRaw, airRaw, ...alertsList] = await Promise.all([
     fetchJson<OpenMeteoForecast | OpenMeteoForecast[]>(weatherUrl.toString()),
+    fetchJson<AirQualityResponse | AirQualityResponse[]>(airUrl.toString()),
     ...conditionPoints.map(p => fetchJson<NwsAlerts>(`https://api.weather.gov/alerts/active?point=${p.lat},${p.lng}`)),
   ]);
 
@@ -188,14 +214,20 @@ export async function fetchConditions(): Promise<ConditionsResponse> {
     : weatherRaw
       ? [weatherRaw]
       : [];
+  const airs: (AirQualityResponse | undefined)[] = Array.isArray(airRaw)
+    ? airRaw
+    : airRaw
+      ? [airRaw]
+      : [];
 
   return {
     generatedAt: new Date().toISOString(),
     forecastCoverageNote:
-      "Open-Meteo provides a rolling 16-day forecast, so the July 22-31 trip dates will fill in as they enter range. NWS alerts are active-now alerts, not long-range predictions.",
-    points: conditionPoints.map((p, i) => buildResult(p, weathers[i], alertsList[i])),
+      "Open-Meteo provides a rolling 16-day forecast, so the July 22-31 trip dates will fill in as they enter range. NWS alerts and air quality are current conditions, not long-range predictions.",
+    points: conditionPoints.map((p, i) => buildResult(p, weathers[i], alertsList[i], airs[i])),
     sources: [
       { label: "Open-Meteo forecast API", url: "https://open-meteo.com/en/docs" },
+      { label: "Open-Meteo air quality API", url: "https://open-meteo.com/en/docs/air-quality-api" },
       { label: "National Weather Service API", url: "https://www.weather.gov/documentation/services-web-api" },
       { label: "NIFC fire maps", url: "https://www.nifc.gov/fire-information/maps" },
     ],
