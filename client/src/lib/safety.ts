@@ -29,7 +29,7 @@ export const HAZARD_EMOJI: Record<Hazard["kind"], string> = {
 // The human-readable NWS point-forecast page for a location — shows any active
 // hazard at the top with a plain-language "click for details" link. Much more
 // useful than the raw api.weather.gov alert JSON that the feed hands back.
-function nwsPointPage(lat: number, lng: number): string {
+export function nwsPointPage(lat: number, lng: number): string {
   return `https://forecast.weather.gov/MapClick.php?lat=${lat.toFixed(4)}&lon=${lng.toFixed(4)}`;
 }
 

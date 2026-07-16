@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { TripMap } from "@/components/TripMap";
 import { Planner, SafetyBanner } from "@/components/Planner";
 import { Logo } from "@/components/Logo";
@@ -7,8 +6,7 @@ import { allDays, routes } from "@/data/julyTrip";
 import { Sun, Moon, Map as MapIcon, ListChecks } from "lucide-react";
 
 export default function Home() {
-  const { theme, toggleTheme, selectedRouteId } = useTrip();
-  const [mobileView, setMobileView] = useState<"map" | "plan">("map");
+  const { theme, toggleTheme, selectedRouteId, mobileView, setMobileView } = useTrip();
 
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const selectedDays = selectedRoute.dayIds.map(id => allDays.find(d => d.id === id)).filter(Boolean);

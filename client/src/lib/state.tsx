@@ -33,7 +33,14 @@ interface TripState {
   // selected route
   selectedRouteId: string;
   setSelectedRouteId: (id: string) => void;
+  // UI navigation (shared so the safety banner can jump to the Live tab)
+  mobileView: "map" | "plan";
+  setMobileView: (v: "map" | "plan") => void;
+  plannerTab: PlannerTab;
+  setPlannerTab: (t: PlannerTab) => void;
 }
+
+export type PlannerTab = "drive" | "days" | "stops" | "hotels" | "conditions" | "saved";
 
 export interface ChecklistItem { text: string; done: boolean; }
 
@@ -119,6 +126,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (stored === "light" || stored === "dark") return stored;
     return typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
+  const [mobileView, setMobileView] = useState<"map" | "plan">("map");
+  const [plannerTab, setPlannerTab] = useState<PlannerTab>("drive");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -169,7 +178,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
     theme,
     toggleTheme: () => setTheme(t => t === "dark" ? "light" : "dark"),
     selectedRouteId, setSelectedRouteId,
-  }), [activeDayId, activeStopId, selectedPlaceId, saved, filters, notes, checklist, theme, selectedRouteId]);
+    mobileView, setMobileView,
+    plannerTab, setPlannerTab,
+  }), [activeDayId, activeStopId, selectedPlaceId, saved, filters, notes, checklist, theme, selectedRouteId, mobileView, plannerTab]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

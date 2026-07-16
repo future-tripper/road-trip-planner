@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTrip } from "@/lib/state";
+import { useTrip, type PlannerTab } from "@/lib/state";
 import { fetchConditions, type ConditionResult, type ConditionsResponse } from "@/lib/conditions";
-import { conditionPointIdForDay, dogWalkWindow, forecastForDay } from "@/lib/forecast";
-import { collectHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS } from "@/lib/safety";
+import { conditionPointIdForDay, dayDateLabel, dogWalkWindow, forecastForDay } from "@/lib/forecast";
+import { collectHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS, nwsPointPage, type Hazard } from "@/lib/safety";
 import {
   allDays,
   bookingGuides,
@@ -36,11 +36,8 @@ const TAG_DEFS: { tag: Tag; label: string; Icon: any }[] = [
   { tag: "easy-day",     label: "Easy day", Icon: Sun },
 ];
 
-type PlannerTab = "drive" | "days" | "stops" | "hotels" | "conditions" | "saved";
-
 export function Planner() {
-  const [tab, setTab] = useState<PlannerTab>("drive");
-  const { selectedPlaceId, selectedRouteId, activeDayId, setActiveDayId } = useTrip();
+  const { selectedPlaceId, selectedRouteId, activeDayId, setActiveDayId, plannerTab: tab, setPlannerTab: setTab } = useTrip();
 
   // When a place is selected, keep the active day synced to the day that contains it
   // (within the current route). This drives the Drive/Itinerary/Map "jump to day" behavior.
@@ -75,39 +72,74 @@ export function Planner() {
 
 // Can't-miss banner: scans every weather point on the selected route for the
 // alerts the family fears most (tornado, flood, fire) plus unhealthy smoke, and
-// surfaces them above everything. Renders nothing when the route is clear.
+// surfaces them above everything. Renders nothing when today & tomorrow are
+// clear; the full route look-ahead lives on the Live tab.
+const SAFETY_COLLAPSE_KEY = "pathfinder.v1.safetyCollapsed";
+
+// Every day on a route paired with its active safety hazards (by overnight city).
+function routeDayHazards(route: Route, points: ConditionResult[]): { day: Day; hazards: Hazard[] }[] {
+  const pointById = new Map(points.map(p => [p.id, p]));
+  return routeDays(route).map(day => {
+    const pid = conditionPointIdForDay(day);
+    const p = pid ? pointById.get(pid) : undefined;
+    return { day, hazards: p ? collectHazards([p]) : [] };
+  });
+}
+
 export function SafetyBanner() {
-  const { selectedRouteId, activeDayId } = useTrip();
+  const { selectedRouteId, activeDayId, setMobileView, setPlannerTab } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const { data } = useQuery<ConditionsResponse>({ queryKey: ["conditions"], queryFn: fetchConditions });
-  // Scope to today's leg and tomorrow's only — where you are and where you're
-  // headed next — so a flood watch 1,500 miles ahead doesn't nag you on Day 1.
-  const days = routeDays(selectedRoute);
-  const idx = Math.max(0, days.findIndex(d => d.id === activeDayId));
-  const pointIds = new Set(
-    days.slice(idx, idx + 2).map(d => conditionPointIdForDay(d)).filter((id): id is string => !!id),
-  );
-  const hazards = collectHazards((data?.points ?? []).filter(p => pointIds.has(p.id)));
-  if (hazards.length === 0) return null;
-  const anyWarning = hazards.some(h => h.severity === "warning");
+
+  const perDay = routeDayHazards(selectedRoute, data?.points ?? []);
+  const idx = Math.max(0, perDay.findIndex(x => x.day.id === activeDayId));
+  // Today's leg and tomorrow's only, so a flood watch 1,500 miles ahead doesn't
+  // nag you on Day 1. Anything further out is counted for the "see all" jump.
+  const scoped = perDay.slice(idx, idx + 2).flatMap(x => x.hazards);
+  const aheadCount = perDay.slice(idx + 2).reduce((n, x) => n + x.hazards.length, 0);
+
+  const sig = scoped.map(h => `${h.city}:${h.label}`).join("|");
+  const [dismissed, setDismissed] = useState<string | null>(() => {
+    try { return localStorage.getItem(SAFETY_COLLAPSE_KEY); } catch { return null; }
+  });
+
+  if (scoped.length === 0) return null;
+  const anyWarning = scoped.some(h => h.severity === "warning");
+  const collapsed = dismissed === sig; // a new/changed hazard set re-expands automatically
+  const tone = anyWarning
+    ? "border-[hsl(6_64%_42%/_.5)] bg-[hsl(6_64%_42%/_.14)] text-[hsl(6_64%_30%)] dark:text-[hsl(6_72%_80%)]"
+    : "border-accent/50 bg-accent/15 text-foreground";
+
+  const collapse = () => { setDismissed(sig); try { localStorage.setItem(SAFETY_COLLAPSE_KEY, sig); } catch {} };
+  const expand = () => { setDismissed(null); try { localStorage.removeItem(SAFETY_COLLAPSE_KEY); } catch {} };
+  const seeAll = () => { setMobileView("plan"); setPlannerTab("conditions"); };
+
+  if (collapsed) {
+    return (
+      <div className="flex shrink-0 justify-end border-b border-border bg-card/40 px-3 py-1">
+        <button
+          type="button"
+          onClick={expand}
+          data-testid="safety-banner-icon"
+          aria-label={`${scoped.length} safety alert${scoped.length === 1 ? "" : "s"} today and tomorrow — expand`}
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold hover-elevate ${tone}`}
+        >
+          <AlertTriangle className="h-3.5 w-3.5" /> {scoped.length}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div
-      role="alert"
-      data-testid="safety-banner"
-      className={`shrink-0 border-b px-3 py-2 ${
-        anyWarning
-          ? "border-[hsl(6_64%_42%/_.5)] bg-[hsl(6_64%_42%/_.14)] text-[hsl(6_64%_30%)] dark:text-[hsl(6_72%_80%)]"
-          : "border-accent/50 bg-accent/15 text-foreground"
-      }`}
-    >
+    <div role="alert" data-testid="safety-banner" className={`shrink-0 border-b px-3 py-2 ${tone}`}>
       <div className="mx-auto flex max-w-5xl items-start gap-2">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-        <div className="min-w-0 text-xs">
+        <div className="min-w-0 flex-1 text-xs">
           <div className="font-semibold">
             {anyWarning ? "Active safety warning — today & tomorrow" : "Safety watch — today & tomorrow"}
           </div>
           <ul className="mt-1 space-y-0.5">
-            {hazards.slice(0, 4).map((h, i) => (
+            {scoped.slice(0, 4).map((h, i) => (
               <li key={`${h.city}-${h.label}-${i}`} className="truncate">
                 <span aria-hidden>{HAZARD_EMOJI[h.kind]}</span>{" "}
                 {h.url ? (
@@ -119,11 +151,22 @@ export function SafetyBanner() {
                 )}
               </li>
             ))}
-            {hazards.length > 4 && (
-              <li className="text-[11px] opacity-80">+{hazards.length - 4} more — see the Live tab</li>
-            )}
           </ul>
+          {aheadCount > 0 && (
+            <button type="button" onClick={seeAll} data-testid="safety-see-all" className="mt-1 font-medium underline underline-offset-2">
+              {aheadCount} more ahead on your route — see all →
+            </button>
+          )}
         </div>
+        <button
+          type="button"
+          onClick={collapse}
+          data-testid="safety-banner-collapse"
+          aria-label="Collapse safety alerts to an icon"
+          className="shrink-0 rounded p-0.5 hover-elevate"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
@@ -426,6 +469,12 @@ function RouteMiniList({ title, items }: { title: string; items: string[] }) {
 }
 
 function Tabs({ tab, setTab }: { tab: string; setTab: (t: any) => void }) {
+  const { selectedRouteId } = useTrip();
+  const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
+  const { data } = useQuery<ConditionsResponse>({ queryKey: ["conditions"], queryFn: fetchConditions });
+  // Total active safety hazards on the route — drives a badge on the Live tab so
+  // hazards ahead are discoverable even when the banner (today+tomorrow) is clear.
+  const hazardCount = routeDayHazards(selectedRoute, data?.points ?? []).reduce((n, x) => n + x.hazards.length, 0);
   const items: { id: any; label: string; testid: string }[] = [
     { id: "drive",  label: "Drive", testid: "tab-drive" },
     { id: "days",   label: "Itinerary", testid: "tab-days" },
@@ -441,9 +490,18 @@ function Tabs({ tab, setTab }: { tab: string; setTab: (t: any) => void }) {
           key={it.id} type="button" role="tab" aria-selected={tab === it.id}
           data-testid={it.testid}
           onClick={() => setTab(it.id)}
-          className={`flex-1 px-3 py-2.5 text-xs font-medium hover-elevate ${tab === it.id ? "border-b-2 border-primary text-foreground" : "text-muted-foreground"}`}
+          className={`relative flex-1 px-3 py-2.5 text-xs font-medium hover-elevate ${tab === it.id ? "border-b-2 border-primary text-foreground" : "text-muted-foreground"}`}
         >
           {it.label}
+          {it.id === "conditions" && hazardCount > 0 && (
+            <span
+              data-testid="tab-conditions-badge"
+              aria-label={`${hazardCount} safety alerts on route`}
+              className="ml-1 inline-flex min-w-[1rem] items-center justify-center rounded-full bg-[hsl(6_64%_42%)] px-1 text-[9px] font-bold text-white"
+            >
+              {hazardCount}
+            </span>
+          )}
         </button>
       ))}
     </nav>
@@ -1303,6 +1361,7 @@ function ConditionsPane() {
   });
   const daysForRoute = routeDays(selectedRoute);
   const pointById = new Map((data?.points ?? []).map(p => [p.id, p]));
+  const daysWithHazards = routeDayHazards(selectedRoute, data?.points ?? []).filter(x => x.hazards.length > 0);
   return (
     <div>
       <div className="border-b border-border bg-accent/10 p-3 text-xs text-foreground" data-testid="conditions-note">
@@ -1321,6 +1380,40 @@ function ConditionsPane() {
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} /> Refresh
         </button>
+      </div>
+      <div className="border-b border-border p-3" data-testid="hazards-ahead">
+        <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          <AlertTriangle className="h-3.5 w-3.5" /> Hazards ahead on your route
+        </div>
+        {daysWithHazards.length === 0 ? (
+          <p className="mt-1 text-xs text-muted-foreground">
+            No tornado, flood, or fire alerts active on your route right now.
+          </p>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {daysWithHazards.map(({ day, hazards }) => (
+              <li key={day.id} data-testid={`hazard-day-${day.id}`}>
+                <div className="text-[11px] font-semibold text-foreground/85">
+                  Day {day.num} · {dayDateLabel(day) ?? ""} · {day.hotelCity}
+                </div>
+                <ul className="mt-0.5 space-y-0.5">
+                  {hazards.map((h, i) => (
+                    <li key={`${h.label}-${i}`} className="text-xs">
+                      <span aria-hidden>{HAZARD_EMOJI[h.kind]}</span>{" "}
+                      {h.url ? (
+                        <a href={h.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                          {h.label}
+                        </a>
+                      ) : (
+                        h.label
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <div className="border-b border-border p-3" data-testid="outlook-links">
         <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
@@ -1443,14 +1536,27 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
         );
       })()}
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <div className="rounded border border-border bg-background/60 p-2">
-          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-            <AlertTriangle className="h-3 w-3" /> NWS alerts (now)
+        {alerts.length > 0 && point ? (
+          <a
+            href={nwsPointPage(point.lat, point.lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid={`link-alerts-${day.id}`}
+            className="rounded border border-border bg-background/60 p-2 text-left hover-elevate"
+          >
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              <AlertTriangle className="h-3 w-3" /> NWS alerts (now)
+            </div>
+            <p className="mt-1 text-xs text-foreground/85">{alerts.slice(0, 2).map(a => a.event).join(", ")}</p>
+          </a>
+        ) : (
+          <div className="rounded border border-border bg-background/60 p-2">
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              <AlertTriangle className="h-3 w-3" /> NWS alerts (now)
+            </div>
+            <p className="mt-1 text-xs text-foreground/85">No active alerts.</p>
           </div>
-          <p className="mt-1 text-xs text-foreground/85">
-            {alerts.length > 0 ? alerts.slice(0, 2).map(a => a.event).join(", ") : "No active alerts."}
-          </p>
-        </div>
+        )}
         <a
           href={point?.wildfire?.link ?? "https://www.nifc.gov/fire-information/maps"}
           target="_blank"
