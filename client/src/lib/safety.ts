@@ -26,6 +26,13 @@ export const HAZARD_EMOJI: Record<Hazard["kind"], string> = {
   smoke: "🌫️",
 };
 
+// The human-readable NWS point-forecast page for a location — shows any active
+// hazard at the top with a plain-language "click for details" link. Much more
+// useful than the raw api.weather.gov alert JSON that the feed hands back.
+function nwsPointPage(lat: number, lng: number): string {
+  return `https://forecast.weather.gov/MapClick.php?lat=${lat.toFixed(4)}&lon=${lng.toFixed(4)}`;
+}
+
 export function collectHazards(points: ConditionResult[]): Hazard[] {
   const seen = new Set<string>();
   const out: Hazard[] = [];
@@ -42,7 +49,7 @@ export function collectHazards(points: ConditionResult[]): Hazard[] {
         label: ev,
         city: p.name,
         severity: /warning/i.test(ev) ? "warning" : "watch",
-        url: a.url,
+        url: nwsPointPage(p.lat, p.lng),
       });
     }
     const aqi = p.airQuality?.usAqi;
@@ -52,6 +59,7 @@ export function collectHazards(points: ConditionResult[]): Hazard[] {
         label: `Unhealthy air — AQI ${aqi} (possible wildfire smoke)`,
         city: p.name,
         severity: "warning",
+        url: "https://fire.airnow.gov/",
       });
     }
   }

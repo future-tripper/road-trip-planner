@@ -77,11 +77,15 @@ export function Planner() {
 // alerts the family fears most (tornado, flood, fire) plus unhealthy smoke, and
 // surfaces them above everything. Renders nothing when the route is clear.
 export function SafetyBanner() {
-  const { selectedRouteId } = useTrip();
+  const { selectedRouteId, activeDayId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const { data } = useQuery<ConditionsResponse>({ queryKey: ["conditions"], queryFn: fetchConditions });
+  // Scope to today's leg and tomorrow's only — where you are and where you're
+  // headed next — so a flood watch 1,500 miles ahead doesn't nag you on Day 1.
+  const days = routeDays(selectedRoute);
+  const idx = Math.max(0, days.findIndex(d => d.id === activeDayId));
   const pointIds = new Set(
-    routeDays(selectedRoute).map(d => conditionPointIdForDay(d)).filter((id): id is string => !!id),
+    days.slice(idx, idx + 2).map(d => conditionPointIdForDay(d)).filter((id): id is string => !!id),
   );
   const hazards = collectHazards((data?.points ?? []).filter(p => pointIds.has(p.id)));
   if (hazards.length === 0) return null;
@@ -100,7 +104,7 @@ export function SafetyBanner() {
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div className="min-w-0 text-xs">
           <div className="font-semibold">
-            {anyWarning ? "Active safety warning on your route" : "Safety watch on your route"}
+            {anyWarning ? "Active safety warning — today & tomorrow" : "Safety watch — today & tomorrow"}
           </div>
           <ul className="mt-1 space-y-0.5">
             {hazards.slice(0, 4).map((h, i) => (
