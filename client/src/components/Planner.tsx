@@ -125,7 +125,7 @@ export function SafetyBanner() {
           onClick={expand}
           data-testid="safety-banner-icon"
           aria-label={`${scoped.length} safety alert${scoped.length === 1 ? "" : "s"} today and tomorrow — expand`}
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold hover-elevate ${tone}`}
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[13px] font-semibold hover-elevate ${tone}`}
         >
           <AlertTriangle className="h-3.5 w-3.5" /> {scoped.length}
         </button>
@@ -277,7 +277,7 @@ function SelectedPlaceBar({ tab, setTab }: { tab: PlannerTab; setTab: (t: Planne
               {stop.name}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-tight text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] leading-tight text-muted-foreground">
             <span className="truncate" data-testid="text-selected-place-location">{locationLabel}</span>
             {day && (
               <span className="inline-flex items-center gap-1" data-testid="text-selected-place-day">
@@ -349,7 +349,7 @@ function JumpChip({ onClick, testid, Icon, label }: { onClick: () => void; testi
       type="button"
       onClick={onClick}
       data-testid={testid}
-      className="inline-flex max-w-full items-center gap-1 truncate rounded-full border border-border bg-background px-2.5 py-1 text-[11px] hover-elevate"
+      className="inline-flex max-w-full items-center gap-1 truncate rounded-full border border-border bg-background px-2.5 py-1 text-[13px] hover-elevate"
     >
       <Icon className="h-3 w-3 shrink-0" /> <span className="truncate">{label}</span>
     </button>
@@ -378,7 +378,7 @@ function RouteSwitcher() {
         className="flex w-full items-center justify-between gap-3 p-3 text-left hover-elevate lg:pointer-events-none"
       >
         <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Route</div>
+          <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Route</div>
           <div className="mt-0.5 flex items-center gap-2 text-sm font-semibold" data-testid="text-selected-route-compact">
             <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colorFor(active.color) }} />
             <span className="truncate">{active.name}</span>
@@ -411,9 +411,9 @@ function RouteSwitcher() {
               >
                 <div className="flex items-start gap-2">
                   <span className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colorFor(route.color) }} />
-                  <span className="min-w-0 whitespace-normal font-sans text-[13px] font-semibold leading-snug tracking-normal">{route.name}</span>
+                  <span className="min-w-0 whitespace-normal font-sans text-[14px] font-semibold leading-snug tracking-normal">{route.name}</span>
                 </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{route.tagline}</div>
+                <div className="mt-0.5 text-[13px] text-muted-foreground">{route.tagline}</div>
               </button>
             );
           })}
@@ -429,7 +429,7 @@ function RouteSwitcher() {
                 onClick={() => setNotes(v => !v)}
                 data-testid="button-toggle-route-details"
                 aria-expanded={notes}
-                className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[11px] hover-elevate"
+                className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[13px] hover-elevate"
               >
                 {notes ? "Less" : "More"}
               </button>
@@ -446,7 +446,7 @@ function RouteSwitcher() {
                   </p>
                 )}
                 {active.overnightCities && (
-                  <p className="mt-2 text-[11px] text-muted-foreground">
+                  <p className="mt-2 text-[13px] text-muted-foreground">
                     Overnight anchors: {active.overnightCities.join(" → ")}
                   </p>
                 )}
@@ -463,8 +463,8 @@ function RouteMiniList({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{title}</div>
-      <ul className="mt-1 list-disc space-y-1 pl-4 text-[11px] text-foreground/80">
+      <div className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground">{title}</div>
+      <ul className="mt-1 list-disc space-y-1 pl-4 text-[13px] text-foreground/80">
         {items.map(item => <li key={item}>{item}</li>)}
       </ul>
     </div>
@@ -503,7 +503,7 @@ function Tabs({ tab, setTab }: { tab: string; setTab: (t: any) => void }) {
             <span
               data-testid="tab-conditions-badge"
               aria-label={`${hazardCount} safety alerts on route`}
-              className="ml-1 inline-flex min-w-[1rem] items-center justify-center rounded-full bg-[hsl(6_64%_42%)] px-1 text-[9px] font-bold text-white"
+              className="ml-1 inline-flex min-w-[1rem] items-center justify-center rounded-full bg-[hsl(6_64%_42%)] px-1 text-[11px] font-bold text-white"
             >
               {hazardCount}
             </span>
@@ -583,7 +583,7 @@ function DrivePane() {
         <section className="rounded-md border border-card-border bg-card p-3" data-testid="drive-day-card">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Today</div>
+              <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Today</div>
               <h3 className="mt-0.5 font-serif text-base font-semibold">{selectedDay.title}</h3>
               <p className="mt-1 text-xs text-muted-foreground">
                 {selectedDay.miles} mi · ~{selectedDay.hours} hrs drive · sleep in {selectedDay.hotelCity}
@@ -605,14 +605,14 @@ function DrivePane() {
                   {dayForecast.max ?? "—"}° / {dayForecast.min ?? "—"}°{dayForecast.feelsMax != null ? ` · feels ${dayForecast.feelsMax}°` : ""}
                 </span>
               </div>
-              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-muted-foreground">
                 <span>{dayForecast.precip ?? "—"}% rain</span>
                 <span>UV {dayForecast.uv ?? "—"}</span>
                 <span>{dayForecast.windMax ?? "—"} mph wind</span>
               </div>
-              {walkWindow && <p className="mt-1 text-[11px] text-muted-foreground">{walkWindow}</p>}
+              {walkWindow && <p className="mt-1 text-[13px] text-muted-foreground">{walkWindow}</p>}
               {dayForecast.reasons[0] && (
-                <p className="mt-1 text-[11px] font-medium text-foreground/85">{dayForecast.reasons[0]}</p>
+                <p className="mt-1 text-[13px] font-medium text-foreground/85">{dayForecast.reasons[0]}</p>
               )}
             </div>
           )}
@@ -686,7 +686,7 @@ function DrivePane() {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="link-drive-hotel-source"
-                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
                 >
                   Open hotel source <ExternalLink className="h-3 w-3" />
                 </a>
@@ -695,14 +695,14 @@ function DrivePane() {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="link-drive-hotel-target-map"
-                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
                 >
                   Google Maps <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
             </div>
           )}
-          <p className="mt-2 text-[11px] text-muted-foreground">
+          <p className="mt-2 text-[13px] text-muted-foreground">
             Call/check: pet fee, weight limit, ground-floor room, nearby grass, whether dog can be left unattended, pool, breakfast, and parking.
           </p>
         </section>
@@ -729,7 +729,7 @@ function DrivePick({ title, Icon, stop, dayId, testid, highlight }: { title: str
       role="button"
       aria-pressed={highlight}
     >
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="flex items-center gap-2 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {title}
       </div>
       <h3 className="mt-1 font-serif text-base font-semibold">{stop.name}</h3>
@@ -773,7 +773,7 @@ function FilterBar() {
   return (
     <div className="border-b border-border bg-card/50 p-3">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Filter</span>
+        <span className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Filter</span>
         {filters.size > 0 && (
           <button
             type="button"
@@ -926,7 +926,7 @@ function PaceBadge({ pace }: { pace: "easy" | "moderate" | "long" }) {
     long:     { label: "long day",    cls: "bg-[hsl(18_56%_50%/_.14)] text-[hsl(18_56%_38%)] dark:bg-[hsl(18_62%_60%/_.18)] dark:text-[hsl(18_62%_72%)]" },
   } as const;
   const m = map[pace];
-  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${m.cls}`}>{m.label}</span>;
+  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] uppercase tracking-wider ${m.cls}`}>{m.label}</span>;
 }
 
 function StopCard({ stop, compact }: { stop: Stop; compact?: boolean }) {
@@ -959,19 +959,19 @@ function StopCard({ stop, compact }: { stop: Stop; compact?: boolean }) {
             <h4 className="font-serif text-sm font-semibold leading-tight">{stop.name}</h4>
             <span className="flex shrink-0 items-baseline gap-1.5">
               {stop.lunch && (
-                <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-accent">lunch stop</span>
+                <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[12px] uppercase tracking-wider text-accent">lunch stop</span>
               )}
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{stop.kind}</span>
+              <span className="text-[12px] uppercase tracking-wider text-muted-foreground">{stop.kind}</span>
             </span>
           </div>
-          <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{stop.region}</div>
+          <div className="text-[13px] uppercase tracking-[0.08em] text-muted-foreground">{stop.region}</div>
           <p className="mt-1.5 text-xs text-foreground/90">{stop.blurb}</p>
           {!compact && (
             <p className="mt-1 text-xs text-muted-foreground">{stop.practical}</p>
           )}
           <div className="mt-2 flex flex-wrap gap-1">
             {stop.tags.slice(0, 5).map(t => (
-              <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-foreground">{t}</span>
+              <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-[12px] text-foreground">{t}</span>
             ))}
           </div>
           <div className="mt-2 flex items-center justify-between">
@@ -991,7 +991,7 @@ function StopCard({ stop, compact }: { stop: Stop; compact?: boolean }) {
                 href={googleMapsSearch(`${stop.name} ${stop.region}`)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                className="inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
                 onClick={(e) => e.stopPropagation()}
                 data-testid={`link-map-${stop.id}`}
               >
@@ -1000,7 +1000,7 @@ function StopCard({ stop, compact }: { stop: Stop; compact?: boolean }) {
               {stop.sources.slice(0, 2).map(src => (
                 <a
                   key={src.url} href={src.url} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
                   onClick={(e) => e.stopPropagation()}
                   data-testid={`link-source-${stop.id}`}
                 >
@@ -1019,7 +1019,7 @@ function DayNotes({ dayId }: { dayId: string }) {
   const { notes, setNote } = useTrip();
   return (
     <div className="mt-4">
-      <label htmlFor={`note-${dayId}`} className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+      <label htmlFor={`note-${dayId}`} className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
         Notes
       </label>
       <textarea
@@ -1041,7 +1041,7 @@ function DayChecklist({ dayId }: { dayId: string }) {
   const items = checklist[dayId] ?? [];
   return (
     <div className="mt-4">
-      <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Checklist</div>
+      <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Checklist</div>
       <ul className="mt-2 space-y-1.5" role="list">
         {items.map((it, i) => (
           <li key={i} className="flex items-center gap-2">
@@ -1122,24 +1122,24 @@ function StopsPane() {
             type="button"
             onClick={() => setSelectedPlaceId(null)}
             data-testid="button-stops-browse-all"
-            className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[11px] hover-elevate"
+            className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[13px] hover-elevate"
           >
             Browse all stops
           </button>
         </div>
-        <div className="px-4 pt-3 pb-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Selected</div>
+        <div className="px-4 pt-3 pb-1 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Selected</div>
         <ul className="space-y-2 px-3 pb-1" role="list">
           <StopCard stop={selectedStop} />
         </ul>
         {related.length > 0 && (
           <>
-            <div className="px-4 pt-3 pb-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground" data-testid="stops-related-heading">
+            <div className="px-4 pt-3 pb-1 text-[13px] uppercase tracking-[0.12em] text-muted-foreground" data-testid="stops-related-heading">
               Related stops near {selectedStop.city ?? selectedStop.region}
             </div>
             <ul className="space-y-2 p-3" role="list" data-testid="stops-related-list">
               {related.map(({ stop: s, reason }) => (
                 <div key={s.id}>
-                  <div className="mb-1 pl-1 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{reason}</div>
+                  <div className="mb-1 pl-1 text-[12px] uppercase tracking-[0.1em] text-muted-foreground">{reason}</div>
                   <StopCard stop={s} />
                 </div>
               ))}
@@ -1158,7 +1158,7 @@ function StopsPane() {
         body="Browse every stop on the selected route, including scenic, weird, kid-friendly, and dog-friendly options."
       />
       <FilterBar />
-      <div className="px-4 pt-3 pb-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="px-4 pt-3 pb-1 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
         {filtered.length} of {routeStops.length} stops on {selectedRoute.name}
       </div>
       <ul className="space-y-2 p-3" role="list">
@@ -1210,7 +1210,7 @@ function HotelsPane() {
         <strong>Booking-ready filter.</strong> Use this as the call-and-click shortlist for {selectedRoute.name}. Verify hotel pet fees, weight limits, breed restrictions, whether pets can be left unattended, patio dog rules, and summer heat before you lock anything in.
       </div>
       <div className="border-b border-border px-3 py-2">
-        <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Overnight booking path</div>
+        <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Overnight booking path</div>
         <div className="mt-1 text-sm font-semibold" data-testid="text-booking-route-name">{selectedRoute.name}</div>
         <p className="mt-1 text-xs text-muted-foreground">
           Prioritized for a 3.5-year-old, a dog, easy parking, fast room access, patios or beer gardens, and stops that still feel memorable.
@@ -1246,7 +1246,7 @@ function BookingCityCard({ h, guide, index, highlight }: { h: typeof hotels[numb
                       <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{guide?.headline ?? h.notes}</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                    <div className="mt-2 flex flex-wrap gap-1.5 text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
                       <span>{guide?.hotelTargets.length ?? h.picks.length} stay targets</span>
                       <span>·</span>
                       <span>{guide?.foodDrink.length ?? 0} food/patio</span>
@@ -1285,12 +1285,12 @@ function BookingCityCard({ h, guide, index, highlight }: { h: typeof hotels[numb
                         <div className="mt-1.5 flex flex-wrap gap-3">
                           <a href={p.searchLink.url} target="_blank" rel="noopener noreferrer"
                              data-testid={`link-search-${h.city}-${p.brand}`}
-                             className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
+                             className="inline-flex items-center gap-1 text-[13px] text-primary hover:underline">
                             {p.searchLink.label} <ExternalLink className="h-3 w-3" />
                           </a>
                           <a href={p.source.url} target="_blank" rel="noopener noreferrer"
                              data-testid={`link-policy-${h.city}-${p.brand}`}
-                             className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:underline">
+                             className="inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:underline">
                             Pet policy <ExternalLink className="h-3 w-3" />
                           </a>
                         </div>
@@ -1307,7 +1307,7 @@ function BookingCityCard({ h, guide, index, highlight }: { h: typeof hotels[numb
 function PaneHeader({ title, eyebrow, body }: { title: string; eyebrow: string; body: string }) {
   return (
     <div className="border-b border-border bg-card px-3 py-3" data-testid={`pane-header-${title.toLowerCase().replaceAll(" ", "-")}`}>
-      <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</div>
+      <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</div>
       <h2 className="mt-0.5 font-serif text-base font-semibold">{title}</h2>
       <p className="mt-1 text-xs text-muted-foreground">{body}</p>
     </div>
@@ -1318,7 +1318,7 @@ function BookingSection({ title, Icon, items, city, testid }: { title: string; I
   if (!items.length) return null;
   return (
     <section className="mt-3" data-testid={testid}>
-      <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {title}
       </div>
       <ul className="mt-1.5 space-y-1.5" role="list">
@@ -1327,7 +1327,7 @@ function BookingSection({ title, Icon, items, city, testid }: { title: string; I
             <div className="flex items-baseline justify-between gap-2">
               <div className="text-sm font-semibold" data-testid={`${testid}-name-${index}`}>{item.name}</div>
               {item.unique && (
-                <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-accent">unique stay</span>
+                <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[12px] uppercase tracking-wider text-accent">unique stay</span>
               )}
             </div>
             <p className="mt-1 text-xs text-foreground/85">{item.note}</p>
@@ -1336,7 +1336,7 @@ function BookingSection({ title, Icon, items, city, testid }: { title: string; I
               target="_blank"
               rel="noopener noreferrer"
               data-testid={`${testid}-link-${index}`}
-              className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+              className="mt-1.5 inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
             >
               {item.source.label} <ExternalLink className="h-3 w-3" />
             </a>
@@ -1345,7 +1345,7 @@ function BookingSection({ title, Icon, items, city, testid }: { title: string; I
               target="_blank"
               rel="noopener noreferrer"
               data-testid={`${testid}-map-${index}`}
-              className="ml-3 mt-1.5 inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+              className="ml-3 mt-1.5 inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
             >
               Maps <ExternalLink className="h-3 w-3" />
             </a>
@@ -1375,7 +1375,7 @@ function ConditionsPane() {
       </div>
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Conditions for</div>
+          <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Conditions for</div>
           <div className="text-sm font-semibold">{selectedRoute.name}</div>
         </div>
         <button
@@ -1388,7 +1388,7 @@ function ConditionsPane() {
         </button>
       </div>
       <div className="border-b border-border p-3" data-testid="hazards-ahead">
-        <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
           <AlertTriangle className="h-3.5 w-3.5" /> Hazards ahead on your route
         </div>
         {daysWithHazards.length === 0 ? (
@@ -1399,7 +1399,7 @@ function ConditionsPane() {
           <ul className="mt-2 space-y-2">
             {daysWithHazards.map(({ day, hazards }) => (
               <li key={day.id} data-testid={`hazard-day-${day.id}`}>
-                <div className="text-[11px] font-semibold text-foreground/85">
+                <div className="text-[13px] font-semibold text-foreground/85">
                   Day {day.num} · {dayDateLabel(day) ?? ""} · {day.hotelCity}
                 </div>
                 <ul className="mt-0.5 space-y-0.5">
@@ -1422,10 +1422,10 @@ function ConditionsPane() {
         )}
       </div>
       <div className="border-b border-border p-3" data-testid="outlook-links">
-        <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
           <AlertTriangle className="h-3.5 w-3.5" /> Days-ahead risk outlooks
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 text-[13px] text-muted-foreground">
           Official forecasts of tornado, flood, and fire risk before warnings are issued — check the morning of and the night before.
         </p>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -1439,7 +1439,7 @@ function ConditionsPane() {
             >
               <span className="min-w-0">
                 <span className="block font-medium leading-tight">{link.label}</span>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{link.detail}</span>
+                <span className="text-[12px] uppercase tracking-wider text-muted-foreground">{link.detail}</span>
               </span>
               <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             </a>
@@ -1469,7 +1469,7 @@ function ConditionsPane() {
           })}
         </ul>
       )}
-      <div className="border-t border-border p-3 text-[11px] text-muted-foreground">
+      <div className="border-t border-border p-3 text-[13px] text-muted-foreground">
         Sources: Open-Meteo forecast API, National Weather Service active alerts, and NIFC wildfire map links. Forecasts update as the July 22-31 dates enter the 16-day window.
       </div>
     </div>
@@ -1491,11 +1491,11 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
     <li className="rounded-md border border-card-border bg-card p-3" data-testid={`condition-card-${day.id}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Day {day.num} · {f?.label ?? "date TBD"}</div>
+          <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Day {day.num} · {f?.label ?? "date TBD"}</div>
           <h3 className="mt-0.5 font-serif text-base font-semibold leading-tight">{day.hotelCity}</h3>
         </div>
         {f && (
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${riskStyles[risk]}`}>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] uppercase tracking-wider ${riskStyles[risk]}`}>
             {risk === "low" ? "clear" : risk}
           </span>
         )}
@@ -1510,7 +1510,7 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
             <span className="inline-flex items-center gap-1 tabular-nums"><Sun className="h-3 w-3" /> UV {f.uv ?? "—"}</span>
             <span className="inline-flex items-center gap-1 tabular-nums"><Wind className="h-3 w-3" /> {f.windMax ?? "—"} mph</span>
           </div>
-          {walk && <p className="mt-1.5 text-[11px] text-muted-foreground">{walk}</p>}
+          {walk && <p className="mt-1.5 text-[13px] text-muted-foreground">{walk}</p>}
           {f.reasons.length > 0 && (
             <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-foreground/85">
               {f.reasons.map(reason => <li key={reason}>{reason}</li>)}
@@ -1535,7 +1535,7 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
           hazardous: "text-[hsl(0_62%_38%)] dark:text-[hsl(0_66%_66%)]",
         }[band.level];
         return (
-          <p className="mt-1.5 text-[11px]">
+          <p className="mt-1.5 text-[13px]">
             <span className="text-muted-foreground">Air now: </span>
             <span className={`font-medium ${aqiColor}`}>{band.label} · AQI {aqi}</span>
           </p>
@@ -1550,14 +1550,14 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
             data-testid={`link-alerts-${day.id}`}
             className="rounded border border-border bg-background/60 p-2 text-left hover-elevate"
           >
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.1em] text-muted-foreground">
               <AlertTriangle className="h-3 w-3" /> NWS alerts (now)
             </div>
             <p className="mt-1 text-xs text-foreground/85">{alerts.slice(0, 2).map(a => a.event).join(", ")}</p>
           </a>
         ) : (
           <div className="rounded border border-border bg-background/60 p-2">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.1em] text-muted-foreground">
               <AlertTriangle className="h-3 w-3" /> NWS alerts (now)
             </div>
             <p className="mt-1 text-xs text-foreground/85">No active alerts.</p>
@@ -1570,7 +1570,7 @@ function DayConditionCard({ day, point }: { day: Day; point?: ConditionResult })
           data-testid={`link-wildfire-${day.id}`}
           className="rounded border border-border bg-background/60 p-2 text-left hover-elevate"
         >
-          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.1em] text-muted-foreground">
             <Flame className="h-3 w-3" /> Wildfire map
           </div>
           <p className="mt-1 text-xs text-foreground/85">{point?.wildfire?.note ?? "Open NIFC fire maps before final booking."}</p>
@@ -1586,7 +1586,7 @@ function TierBadge({ tier }: { tier: "budget" | "mid" | "boutique" }) {
     mid:      { l: "mid-range", c: "bg-primary/10 text-primary" },
     boutique: { l: "boutique", c: "bg-accent/15 text-accent" },
   }[tier];
-  return <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${m.c}`}>{m.l}</span>;
+  return <span className={`rounded-full px-2 py-0.5 text-[12px] uppercase tracking-wider ${m.c}`}>{m.l}</span>;
 }
 
 // Compact strip to add/remove the currently selected place — no repeated giant card.
@@ -1601,7 +1601,7 @@ function SavedSelectedStrip() {
       <MapPin className="h-4 w-4 shrink-0 text-primary" />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold" title={stop.name}>{stop.name}</div>
-        <div className="text-[11px] text-muted-foreground">{isSaved ? "In your plan" : "Not in your plan yet"}</div>
+        <div className="text-[13px] text-muted-foreground">{isSaved ? "In your plan" : "Not in your plan yet"}</div>
       </div>
       <button
         type="button"
@@ -1639,7 +1639,7 @@ function SavedPane() {
     <div>
       <SavedSelectedStrip />
       <div className="flex items-center justify-between border-b border-border p-3">
-        <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground" data-testid="text-saved-count">
+        <span className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground" data-testid="text-saved-count">
           {list.length} stop{list.length === 1 ? "" : "s"} in your plan
         </span>
         <button

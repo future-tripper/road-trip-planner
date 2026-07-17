@@ -5,6 +5,13 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      // Type floor raised for mobile legibility: the itinerary content is dense
+      // and was reading too small on a phone. xs 12→14, sm 14→15 (with matching
+      // line-heights). base/lg keep Tailwind defaults.
+      fontSize: {
+        xs: ["0.875rem", { lineHeight: "1.25rem" }],   /* 14px / 20px */
+        sm: ["0.9375rem", { lineHeight: "1.375rem" }], /* 15px / 22px */
+      },
       borderRadius: {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */

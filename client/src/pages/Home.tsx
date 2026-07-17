@@ -25,7 +25,7 @@ export default function Home() {
           </span>
           <div className="min-w-0 leading-tight">
             <div className="truncate font-serif text-base font-semibold sm:text-lg">Pathfinder</div>
-            <div className="hidden max-w-[48vw] truncate text-[11px] uppercase tracking-[0.12em] text-muted-foreground sm:block lg:max-w-none">
+            <div className="hidden max-w-[48vw] truncate text-[13px] uppercase tracking-[0.12em] text-muted-foreground sm:block lg:max-w-none">
               July 22-31 · North Branford, CT to Del Mar, CA · {selectedRoute.name}
             </div>
           </div>
@@ -91,8 +91,8 @@ export default function Home() {
 function Stat({ label, value, accent, testid }: { label: string; value: string; accent?: boolean; testid: string }) {
   return (
     <div className="min-w-[2.25rem] text-center leading-tight sm:min-w-[3.25rem]" data-testid={testid}>
-      <div className={`whitespace-nowrap font-sans text-[13px] font-bold tabular-nums sm:text-base ${accent ? "text-accent" : ""}`}>{value}</div>
-      <div className="text-[8px] uppercase tracking-[0.08em] text-muted-foreground sm:text-[10px] sm:tracking-[0.1em]">{label}</div>
+      <div className={`whitespace-nowrap font-sans text-[14px] font-bold tabular-nums sm:text-base ${accent ? "text-accent" : ""}`}>{value}</div>
+      <div className="text-[8px] uppercase tracking-[0.08em] text-muted-foreground sm:text-[12px] sm:tracking-[0.1em]">{label}</div>
     </div>
   );
 }
@@ -103,7 +103,7 @@ function Legend() {
       className="absolute left-3 bottom-6 z-[400] rounded-md border border-border bg-card/95 p-3 shadow-md backdrop-blur"
       data-testid="map-legend"
     >
-      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Legend</div>
+      <div className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground">Legend</div>
       <div className="mt-1.5 space-y-1 text-xs">
         <LegendRow color="hsl(var(--primary))" label="Main stop" />
         <LegendRow color="hsl(var(--accent))" label="Today’s drive" line />
