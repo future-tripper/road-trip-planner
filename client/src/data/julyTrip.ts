@@ -1592,7 +1592,7 @@ export const stops: Stop[] = [
     name: "Station 101 Pub & Kitchen, DuBois",
     region: "DuBois, Pennsylvania",
     kind: "break",
-    lat: 41.14, lng: -78.74,
+    lat: 41.1271, lng: -78.7125,
     blurb: "A dog-friendly pub right off I-80 in DuBois, with a covered, heated patio that works in almost any weather.",
     practical: "About an hour into Day 2, at the same DuBois exit used for the Punxsutawney detour — an efficient lunch-plus-Americana combo.",
     tags: ["dog-friendly", "food-break", "kid-friendly"],
