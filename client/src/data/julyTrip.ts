@@ -25,6 +25,10 @@ const ROCKIES = "rockies-utah-grand-canyon-10";
 const ROUTE66 = "route66-grand-canyon-10";
 const BOTH = [ROCKIES, ROUTE66];
 
+// Days for the new I-80 plan, validated by script/check-data.ts while they're
+// being authored, before the routes swap over. Removed when the swap lands.
+export const pendingDayGroups: Day[][] = [];
+
 const chainSources = {
   laQuinta: source("La Quinta pet policy", "https://www.wyndhamhotels.com/laquinta/about-us/pet-friendly"),
   bestWestern: source("Best Western pet policy", "https://www.bestwestern.com/en_US/hotels/discover-best-western/pet-friendly-hotels.html"),
