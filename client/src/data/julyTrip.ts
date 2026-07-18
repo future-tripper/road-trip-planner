@@ -3336,6 +3336,38 @@ export const hotels: Hotel[] = [
     notes: "If you need an arrival hotel before housing is ready, check Del Mar/Solana Beach/Encinitas pet inventory and beach access rules.",
     picks: picks("Del Mar Encinitas", "CA"),
   },
+
+  // ---------- I-80 TRUNK CITIES (Tasks 2-5) ----------
+  {
+    city: "State College",
+    state: "PA",
+    notes: "Night 1, after the trip's longest driving day and an afternoon at Knoebels. The Nittany Lion Inn sits on Penn State's campus edge, a short walk from downtown and Tudek Park's fenced dog run.",
+    picks: picks("State College", "PA"),
+  },
+  {
+    city: "Cleveland",
+    state: "OH",
+    notes: "Night 2, after Edgewater's dog beach and the Christmas Story House leg-lamp photo. Kimpton Schofield downtown has the best pet policy of the trip; Lakewood/Rocky River chains are the shorter-hop option for tomorrow's early push toward Chicago.",
+    picks: picks("Cleveland", "OH"),
+  },
+  {
+    city: "Chicago",
+    state: "IL",
+    notes: "Night 3. The city fix already happened at Cloud Gate and Maggie Daley downtown — base near O'Hare/Rosemont instead, for an easy morning exit toward Iowa.",
+    picks: picks("Chicago", "IL"),
+  },
+  {
+    city: "Des Moines",
+    state: "IA",
+    notes: "Night 4, after the Pappajohn Sculpture Park walk and Union Park's carousel. The Surety Hotel downtown is the boutique pick; West Des Moines/Jordan Creek chains are closer to tomorrow's highway toward Nebraska.",
+    picks: picks("Des Moines", "IA"),
+  },
+  {
+    city: "Kearney",
+    state: "NE",
+    notes: "Night 5 — fork-decision night. Hotels cluster near 2nd Ave and the I-80 exits, a short hop from the Archway and Yanney Park's splash pad; no unique dog-friendly stay verifies here, so prioritize a pool and a firm weight-limit number.",
+    picks: picks("Kearney", "NE"),
+  },
 ];
 
 export const bookingGuides: BookingGuide[] = [
@@ -3624,6 +3656,104 @@ export const bookingGuides: BookingGuide[] = [
     ],
     attractionNotes: [
       { name: "North Beach dawn window", note: "Time the dog’s first SoCal beach run before 8am, then shift to leashed South Beach later.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
+    ],
+  },
+
+  // ---------- I-80 TRUNK CITIES (Tasks 2-5) ----------
+  {
+    city: "State College",
+    headline: "The trip’s longest driving day ends on Penn State’s campus, at a historic inn that takes the dog — and a downtown pub that’s practically named for the trip.",
+    hotelStrategy: "The Nittany Lion Inn is the characterful pick: a 1930s Penn State-owned hotel on the edge of campus, a five-minute walk from downtown State College. Pets are welcome at any size; the inn’s own FAQ just says \"contact hotel for rates,\" so confirm the exact fee at booking (aggregators report ~$50/stay). If it’s booked up, Graduate State College is the backup, but its 75-lb pet limit is real — call ahead if the dog is on the larger side.",
+    hotelTargets: [
+      { name: "The Nittany Lion Inn", note: "1930s Penn State-owned hotel on the edge of campus; pets of any size welcome. The hotel’s own FAQ doesn’t quote a fee (\"contact hotel for rates\") — aggregators report ~$50/stay, so confirm at booking.", source: source("The Nittany Lion Inn — FAQ", "https://www.thenittanylioninn.com/faq/"), unique: true },
+      { name: "Graduate State College", note: "Penn State-themed Hilton boutique downtown; up to 75 lb per pet, ~$75/pet/stay reported — a real weight limit, so call ahead if the dog is close to it.", source: source("BringFido — Graduate State College", "https://www.bringfido.com/lodging/91073") },
+    ],
+    foodDrink: [
+      { name: "Doggie’s Pub", note: "Downtown pub literally named for the occasion — dog-friendly garden patio with picnic tables and cornhole, but dogs reportedly aren’t allowed after 7pm, so plan on an early dinner.", source: source("BringFido — Doggie’s Pub", "https://www.bringfido.com/restaurant/81620") },
+      { name: "Gigi’s Southern Table", note: "Leashed dogs welcome at four outdoor patio tables; order at the counter since there’s no table service outside. Southern comfort food that’s easy for a toddler.", source: source("BringFido — Gigi’s Southern Table", "https://www.bringfido.com/restaurant/103989") },
+    ],
+    logistics: [
+      { name: "Tom Tudek Memorial Park", note: "Stop here on the way in, before the hotel — the fenced dog park and two playgrounds handle the evening burn-off, so check-in itself can be low-key.", source: source("Centre Region Parks & Rec — Tom Tudek Memorial Park", "https://www.centredoutdoors.org/visit/tom-tudek-memorial-park") },
+    ],
+    attractionNotes: [
+      { name: "Knoebels", note: "The afternoon’s real energy-burner — old-growth tree shade keeps the free-admission midway workable even if the day runs hot.", source: source("Knoebels — plan your visit", "https://www.knoebels.com/") },
+    ],
+  },
+  {
+    city: "Cleveland",
+    headline: "Downtown gets the best pet policy of the whole trip; the west side gets a shorter run at tomorrow’s push toward Chicago.",
+    hotelStrategy: "Kimpton Schofield Hotel — an 1902 clock-tower building downtown — has the best pet policy of the whole trip: no fee, no size or weight limit, confirmed directly on the hotel’s own page, plus an on-site restaurant (Betts) that seats dogs on its patio. The trade-off is geography: Edgewater and tomorrow’s I-90 push toward Elkhart both favor the west side (Lakewood/Rocky River), and downtown means a short backtrack the next morning. A Lakewood-area bed-and-breakfast looked like a west-side unique option but its pet policy couldn’t be confirmed on its own site and it has only one pet-friendly room — not reliable enough to recommend. If minimizing tomorrow’s backtrack matters more than the pet-policy upgrade, take a Lakewood/Rocky River chain instead.",
+    hotelTargets: [
+      { name: "Kimpton Schofield Hotel", note: "1902 clock-tower building downtown; Kimpton’s no-fee, no-size-limit pet policy confirmed directly on the hotel’s own page — the best pet deal of the whole trip. On-site restaurant Betts seats dogs on its patio.", source: source("Kimpton Schofield — pet-friendly", "https://www.theschofieldhotel.com/cleveland-downtown-hotels/pet-friendly/"), unique: true },
+      { name: "Lakewood / Rocky River chains", note: "West-side option that shortens tomorrow’s run toward the Indiana/Chicago leg; verify each property’s pet fee and weight limit.", source: source("This is Cleveland", "https://www.thisiscleveland.com/") },
+    ],
+    foodDrink: [
+      { name: "Betts (at the Kimpton Schofield)", note: "The hotel’s own restaurant seats guests and their dogs together on the patio, with fresh water and treats provided.", source: source("Hanford Sentinel — Cleveland’s most dog-friendly hotel", "https://hanfordsentinel.com/lifestyles/all-paws-welcome-at-cleveland-s-most-dog-friendly-hotel/article_f87f59d5-8703-459a-bf95-d4707dc51ebc.html") },
+      { name: "BrewDog Cleveland Outpost", note: "River-view patio with fire pits and yard games in the Flats/Ohio City; dogs are always welcome outside, per the bar’s own site.", source: source("BrewDog Cleveland Outpost", "https://usa.brewdog.com/pages/bars/cleveland-outpost") },
+    ],
+    logistics: [
+      { name: "Edgewater Park Dog Beach", note: "Visited before check-in on this route, so the hotel’s exact location doesn’t affect reaching it — but it does affect tomorrow’s I-90 run west; open until dusk.", source: source("Cleveland Metroparks — Edgewater Beach", "https://www.clevelandmetroparks.com/parks/visit/parks/lakefront-reservation/edgewater-beach") },
+    ],
+    attractionNotes: [
+      { name: "A Christmas Story House", note: "Exterior/leg-lamp photo stop only — pets aren’t allowed anywhere on the property, house or gift shop.", source: source("House From A Christmas Story — Pet Policy FAQ", "https://housefromachristmasstory.com/spend-the-night/faqs/") },
+    ],
+  },
+  {
+    city: "Chicago",
+    headline: "The city fix happens at Cloud Gate downtown — tonight’s hotel bases near O’Hare/Rosemont instead, for an easy morning exit toward Iowa.",
+    hotelStrategy: "The day’s own routing puts this stop near O’Hare/Rosemont rather than downtown, so downtown boutiques (Kimpton Gray/Monaco, Hotel Lincoln) don’t fit tonight’s logistics. Loews Chicago O’Hare is the practical characterful pick instead: the Loews Loves Pets program allows 2 pets for a flat $120/stay with no weight limit stated on the official policy page, there’s an aviation-themed on-site gastropub, and Harry Caray’s dog-friendly patio is a few minutes away in the same Rosemont strip.",
+    hotelTargets: [
+      { name: "Loews Chicago O’Hare Hotel", note: "Full-service hotel in Rosemont, 2 miles from O’Hare; Loews Loves Pets allows 2 pets per room for a flat $120/stay with no weight limit stated on the official policy page (some aggregators cite lower caps — confirm at booking). On-site gastropub The Ashburn leans into an aviation theme.", source: source("Loews Chicago O’Hare — Loews Loves Pets", "https://www.loewshotels.com/chicago-ohare/loews-loves-pets"), unique: true },
+      { name: "Hyatt Regency O’Hare", note: "Also in Rosemont; Romingo lists a 50-lb limit, $100 pet fee, 1 pet max — a real weight limit, so confirm before booking if the dog is close to it.", source: source("Romingo — Hyatt Regency O’Hare Chicago", "https://www.romingo.com/pet-friendly-hotel/illinois/rosemont/hyatt-regency-ohare-chicago") },
+    ],
+    foodDrink: [
+      { name: "Harry Caray’s Italian Steakhouse (Rosemont)", note: "Tree-lined, dog-friendly patio a few minutes from the Loews; steakhouse menu with an easy burger option for a toddler.", source: source("BringFido — Harry Caray’s Italian Steakhouse, Rosemont", "https://www.bringfido.com/restaurant/33843") },
+      { name: "Stan’s Donuts & Coffee (Rosemont)", note: "Dog-friendly outdoor patio a block over on Higgins Rd — good for a quick breakfast before the Iowa push; dogs wait outside while you order at the counter.", source: source("BringFido — Stan’s Donuts & Coffee, Rosemont", "https://www.bringfido.com/restaurant/95220") },
+    ],
+    logistics: [
+      { name: "Skip downtown parking for the hotel", note: "The city fix already happened at the Bean — Rosemont/Des Plaines chains cluster a few minutes from both the Leaning Tower of Niles and the highway toward Iowa.", source: source("Choose Chicago", "https://www.choosechicago.com/") },
+    ],
+    attractionNotes: [
+      { name: "Cloud Gate (\"The Bean\")", note: "Millennium Park bans all pets, even leashed — one adult waits with the dog on a Grant Park sidewalk a block over while the other gets the photo.", source: source("City of Chicago — Millennium Park", "https://www.chicago.gov/city/en/depts/dca/supp_info/millennium_park.html") },
+      { name: "Maggie Daley Park Play Garden", note: "The toddler energy-burner next door to the Bean; pets aren’t allowed in the Play Garden itself.", source: source("Maggie Daley Park — Play Garden", "https://maggiedaleypark.com/things-to-do/play-garden/") },
+    ],
+  },
+  {
+    city: "Des Moines",
+    headline: "An evening among Keith Haring sculptures and a 1930s carousel, then a night in a converted 1913 bank downtown — or the West Des Moines highway side if tomorrow’s exit matters more.",
+    hotelStrategy: "The Surety Hotel — a 1913 bank building (the old Hippee Building) turned boutique — is the character pick, a few blocks from the Pappajohn walk. Flag this: the hotel’s own site caps pets at 50 lb (2 per room, ~$75 fee), while Marriott’s listing for the same property says up to 100 lb — get the real number before booking if the dog is anywhere near that range. It’s also downtown, while the day’s own routing favors West Des Moines/Jordan Creek for a shorter run at Nebraska tomorrow; Wildwood Lodge in Clive is the verified no-weight-limit alternative out that way, just without Surety’s on-site character or restaurant.",
+    hotelTargets: [
+      { name: "Surety Hotel, Autograph Collection", note: "1913 Beaux-Arts bank building (the Hippee Building) converted into a 138-room boutique hotel downtown. The hotel’s own site caps pets at 50 lb, 2 per room, ~$75 fee — but Marriott’s listing for the same property says up to 100 lb. This is a real conflict, not a rounding error — call and get it in writing if the dog is over 50 lb.", source: source("Surety Hotel — pet-friendly stays", "https://suretyhotel.com/experience-surety/pets/"), unique: true },
+      { name: "Wildwood Lodge (Clive)", note: "Near Jordan Creek, matching the day’s own \"West Des Moines\" routing note; accepts dogs of any breed or weight, 2 per room, $20/dog/night — confirmed on the hotel’s own FAQ, no weight-limit ambiguity. No on-site restaurant; nearest dining is room service from a neighboring Chili’s plus a handful of nearby chains.", source: source("Wildwood Lodge — FAQs", "https://thewildwoodlodge.com/clive/faqs/") },
+    ],
+    foodDrink: [
+      { name: "Confluence Brewing Company", note: "Dog-friendly beer garden/patio confirmed on the brewery’s own site — leashed dogs only, access from the Gray’s Lake bike trail or around the parking-lot fence, never through the indoor taproom.", source: source("Confluence Brewing — Visit the Taproom", "https://www.confluencebrewing.com/location/confluence-brewing/") },
+      { name: "Zombie Burger", note: "East Village burger spot with a reportedly dog-friendly sidewalk patio (aggregator-sourced — confirm at the table); an easy walk from Surety, across the river.", source: source("BringFido — Zombie Burger", "https://www.bringfido.com/restaurant/93304") },
+    ],
+    logistics: [
+      { name: "Pappajohn Sculpture Park dog rules", note: "Sources disagree on whether leashed dogs are welcome among the sculptures — the Art Center’s own visitor page doesn’t address it either way. Treat it as a quick evening photo walk and confirm on arrival.", source: source("Des Moines Art Center — Pappajohn Sculpture Park", "https://desmoinesartcenter.org/visit/pappajohn-sculpture-park/") },
+    ],
+    attractionNotes: [
+      { name: "Union Park & The Heritage Carousel", note: "50-cent rides on a restored 1930s carousel plus a splash pool — the evening’s real energy-burner before bed; both close for the season after Labor Day, so this only works on the trip’s July dates.", source: source("Heritage Carousel — Location & Hours", "https://heritagecarousel.org/location-hours") },
+    ],
+  },
+  {
+    city: "Kearney",
+    headline: "Fork-decision night — no unique dog-friendly stay verifies here, so lean on a pool and a firm weight-limit number instead.",
+    hotelStrategy: "Kearney’s inventory is standard highway chains — no boutique or characterful dog-friendly option verifies here, so chains are the honest play tonight. Prioritize a pool for the July heat and get the pet weight limit in writing before booking, since both realistic options cap it. Best Western Plus Mid-Nebraska Inn & Suites has an indoor pool and hot tub and sits right off 2nd Ave near the I-80 exits, matching the day’s own routing note.",
+    hotelTargets: [
+      { name: "Best Western Plus Mid-Nebraska Inn & Suites", note: "Indoor pool and hot tub, right off 2nd Ave near the I-80 exits; up to 2 dogs, 80-lb weight limit, $25/day pet rate ($150/week max) reported.", source: source("BringFido — Best Western Plus Mid Nebraska Inn & Suites", "https://www.bringfido.com/lodging/85149") },
+      { name: "Hampton Inn Kearney", note: "Up to 2 pets, 75-lb weight limit, $75/stay for 1-4 nights ($125 for longer) reported.", source: source("BringFido — Hampton Inn Kearney", "https://www.bringfido.com/lodging/378662") },
+    ],
+    foodDrink: [
+      { name: "Cunningham’s Journal on the Bricks", note: "Downtown gastropub in an 1890 building with a dog-friendly courtyard patio; a few blocks from the 2nd Ave hotel cluster.", source: source("BringFido — Cunningham’s Journal on the Bricks", "https://www.bringfido.com/restaurant/86355") },
+    ],
+    logistics: [
+      { name: "Fork-decision dinner", note: "Check the Live tab’s road conditions before locking in Wyoming vs. Colorado over dinner tonight.", source: source("Visit Kearney Nebraska", "https://visitkearney.org/") },
+    ],
+    attractionNotes: [
+      { name: "The Archway", note: "The museum bridge that arches over I-80 itself — an air-conditioned hour of pioneer-trail exhibits; dogs wait out the visit, but there’s green space below for a leg stretch.", source: source("The Archway", "https://archway.org/") },
+      { name: "Yanney Heritage Park", note: "Splash pad plus leashed-dog-friendly walking paths — the day’s real cool-off after the longest stretch of open highway so far.", source: source("City of Kearney — Yanney Heritage Park", "https://www.cityofkearney.org/1893/Yanney-Heritage-Park") },
     ],
   },
 ];
