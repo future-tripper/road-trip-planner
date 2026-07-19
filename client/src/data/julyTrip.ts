@@ -3449,7 +3449,7 @@ export const hotels: Hotel[] = [
   {
     city: "Del Mar",
     state: "CA",
-    notes: "If you need an arrival hotel before housing is ready, check Del Mar/Solana Beach/Encinitas pet inventory and beach access rules.",
+    notes: "Trip-end arrival, roughly dinnertime on Jul 30 after the hottest, longest day of the trip. L'Auberge Del Mar is the beachfront splurge pick right in Del Mar Village; if that doesn't fit the budget or housing isn't ready yet, check Del Mar/Solana Beach/Encinitas pet inventory and beach access rules.",
     picks: picks("Del Mar Encinitas", "CA"),
   },
 
@@ -3483,6 +3483,38 @@ export const hotels: Hotel[] = [
     state: "NE",
     notes: "Night 5 — fork-decision night. Hotels cluster near 2nd Ave and the I-80 exits, a short hop from the Archway and Yanney Park's splash pad; no unique dog-friendly stay verifies here, so prioritize a pool and a firm weight-limit number.",
     picks: picks("Kearney", "NE"),
+  },
+
+  // ---------- WYOMING / COLORADO BRANCH CITIES (Task 7) ----------
+  {
+    city: "Laramie",
+    state: "WY",
+    notes: "Night 6, after the day's monument run over the top of I-80 — Vedauwoo, the Ames pyramid, and the giant Lincoln head at the highway's high point. Hotels cluster near the I-80 exits on the east side of town; no boutique or characterful dog-friendly stay verifies here (the Mad Carpenter Inn B&B downtown doesn't take pets), so prioritize a pool and a firm weight-limit number.",
+    picks: picks("Laramie", "WY"),
+  },
+  {
+    city: "Park City",
+    state: "UT",
+    notes: "Night 7, after the longest open-highway stretch of the trip — Main Street's Old West storefronts at 7,000 ft are the evening reward. The Washington School House is the characterful pick a block off Main St, but it's a genuine splurge; Hyatt Place Park City is the realistic fallback.",
+    picks: picks("Park City", "UT"),
+  },
+  {
+    city: "Golden",
+    state: "CO",
+    notes: "Night 6 on the Colorado fork, after a drive-up look at Red Rocks and a Clear Creek wade. The Golden Hotel sits right on Clear Creek in walkable downtown Golden; TownePlace Suites Denver West/Federal Center (also a Golden address) is the practical alternate if it's booked up.",
+    picks: picks("Golden", "CO"),
+  },
+  {
+    city: "Glenwood Springs",
+    state: "CO",
+    notes: "Night 7 on the Colorado fork — the shortest driving day of the trip, with caverns, the hot springs pool, and Two Rivers Park filling the afternoon. Hotel Colorado is the 1893 historic pick across the street from the hot springs; Hampton Inn Glenwood Springs is the pool-equipped fallback.",
+    picks: picks("Glenwood Springs", "CO"),
+  },
+  {
+    city: "Cedar City",
+    state: "UT",
+    notes: "Night 8, where both branches converge — Coal Creek's splash and the landlocked-lighthouse photo close out the day before the final desert push. No boutique or characterful dog-friendly stay verifies here (the Big Yellow Inn B&B downtown doesn't take pets), so prioritize a pool and a firm weight-limit number.",
+    picks: picks("Cedar City", "UT"),
   },
 ];
 
@@ -3758,20 +3790,22 @@ export const bookingGuides: BookingGuide[] = [
   },
   {
     city: "Del Mar",
-    headline: "Arrival plan: use beach rules carefully, especially in the summer dog-restriction window.",
-    hotelStrategy: "If housing is not ready, search Del Mar/Solana Beach/Encinitas and verify pet fees directly with the property.",
+    headline: "Trip-end arrival, roughly dinnertime on Jul 30 — a beachfront splurge night is one real option, and the summer dog-beach rules need care either way.",
+    hotelStrategy: "This is the last night of the drive, arriving around dinnertime after the hottest day of the trip. L’Auberge Del Mar is a genuine splurge but the most characterful option on the table: a beachfront resort right in Del Mar Village, up to two 75-lb dogs for a flat $200 non-refundable fee (confirmed on the hotel’s own pet-friendly page), and its own restaurant, Adelaide, is on Del Mar Village’s official dog-friendly dining list — an easy on-site dinner the night you roll in. If that doesn’t fit the budget or housing isn’t ready yet, search Del Mar/Solana Beach/Encinitas chain inventory and verify pet fees directly with the property.",
     hotelTargets: [
-      { name: "Del Mar / Solana Beach / Encinitas search area", note: "Specific hotel pet fees not source-confirmed here; beach access is the key dog value.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
+      { name: "L’Auberge Del Mar", note: "Beachfront resort in Del Mar Village, about a block from Seagrove Park. Up to two dogs, 75 lb each, for a flat $200 non-refundable pet fee — confirmed on the hotel’s own pet-friendly page. Treats and water bowls at the front desk; no on-site pet relief area, but Seagrove Park covers that a block away.", source: source("L’Auberge Del Mar — pet friendly", "https://www.laubergedelmar.com/resort/pet-friendly/"), unique: true },
+      { name: "Del Mar / Solana Beach / Encinitas search area", note: "If L’Auberge doesn’t fit the budget or the trip-end mood, standard chain inventory nearby has pet-friendly rooms; verify each property’s fee directly.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
     ],
     foodDrink: [
-      { name: "Local patio verification needed", note: "No official source-confirmed restaurant patio verified; call Del Mar Plaza/Camino del Mar patios ahead.", source: source("Visit Del Mar Village", "https://visitdelmarvillage.com/") },
+      { name: "Adelaide (at L’Auberge Del Mar)", note: "Ocean-forward coastal restaurant on Visit Del Mar Village’s own dog-friendly dining list — an easy on-site dinner the night you arrive, no extra driving after the trip’s longest day.", source: source("Visit Del Mar Village — pet-friendly dining", "https://www.visitdelmarvillage.com/pet-friendly-dine") },
+      { name: "Stratford Court Cafe", note: "Explicitly dog-friendly cafe with deck seating, per the same official list — a good breakfast option the next morning.", source: source("Visit Del Mar Village — pet-friendly dining", "https://www.visitdelmarvillage.com/pet-friendly-dine") },
     ],
     logistics: [
-      { name: "North Beach summer rule", note: "June 16-Labor Day: dogs off-leash dawn-8am, leashed rest of day.", source: source("City of Del Mar dog rules PDF", "https://www.delmar.ca.us/DocumentCenter/View/7740/Dog-Rules") },
-      { name: "Main/South Beach summer rule", note: "Main Beach has no dogs in summer; South Beach allows leashed dogs at all times.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
+      { name: "North Beach summer rule", note: "June 16–Labor Day: between 29th St and the Solana Beach border, dogs are off-leash dawn–8am and leashed the rest of the day — confirmed on the city’s own dog-beaches page.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
+      { name: "Main Beach summer rule", note: "Between Powerhouse Park and 29th St, dogs are prohibited entirely June 16–Labor Day; from 6th St to Powerhouse Park, dogs must be leashed year-round.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
     ],
     attractionNotes: [
-      { name: "North Beach dawn window", note: "Time the dog’s first SoCal beach run before 8am, then shift to leashed South Beach later.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
+      { name: "North Beach dawn window", note: "With a dinnertime arrival on Jul 30, the dog’s first SoCal beach run realistically waits for the next morning’s dawn-to-8am off-leash window, not tonight.", source: source("City of Del Mar dog beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches") },
     ],
   },
 
@@ -3870,6 +3904,98 @@ export const bookingGuides: BookingGuide[] = [
     attractionNotes: [
       { name: "The Archway", note: "The museum bridge that arches over I-80 itself — an air-conditioned hour of pioneer-trail exhibits; dogs wait out the visit, but there’s green space below for a leg stretch.", source: source("The Archway", "https://archway.org/") },
       { name: "Yanney Heritage Park", note: "Splash pad plus leashed-dog-friendly walking paths — the day’s real cool-off after the longest stretch of open highway so far.", source: source("City of Kearney — Yanney Heritage Park", "https://www.cityofkearney.org/1893/Yanney-Heritage-Park") },
+    ],
+  },
+
+  // ---------- WYOMING / COLORADO BRANCH CITIES (Task 7) ----------
+  {
+    city: "Laramie",
+    headline: "After the summit monument run, no boutique dog-friendly stay verifies in Laramie — lean on a pool and a firm weight-limit number instead.",
+    hotelStrategy: "Laramie’s one real B&B candidate, the Mad Carpenter Inn, doesn’t take pets, and no other characterful downtown option confirms a dog policy — so chains are the honest play tonight. Best Western Laramie Inn & Suites is the pick: an indoor heated pool and hot tub, an 80-lb weight limit, and a per-night (not per-stay) pet fee that’s easy to plan around. Hampton Inn Laramie is the backup, but its sources disagree sharply on the weight limit — get the real number before booking if it matters.",
+    hotelTargets: [
+      { name: "Best Western Laramie Inn & Suites", note: "Indoor heated pool and hot tub; up to 2 dogs, 80-lb weight limit, $20/pet/night reported.", source: source("Romingo — Best Western Laramie Inn & Suites", "https://www.romingo.com/pet-friendly-hotel/wyoming/laramie/best-western-laramie-inn-suites") },
+      { name: "Hampton Inn Laramie", note: "Indoor pool and hot tub; up to 2 dogs, $25/night ($75/stay max) reported — but sources disagree sharply on the weight limit (150 lb per one BringFido listing, 75 lb reported elsewhere for the same chain), so confirm the real cap before booking.", source: source("BringFido — Hampton Inn Laramie", "https://www.bringfido.com/lodging/99665") },
+    ],
+    foodDrink: [
+      { name: "Bond’s Brewing Company", note: "Downtown craft brewery where dogs are welcome both inside the taproom and on the patio, per BringFido; food comes from a rotating food truck, so it works for a casual dinner after a long driving day.", source: source("BringFido — Bond’s Brewing Company", "https://www.bringfido.com/attraction/39332") },
+    ],
+    logistics: [
+      { name: "Optimist Park Dog Park", note: "A fenced off-leash dog park with agility features between W Garfield and Spruce streets — a real run for the dog before bed, not just a hotel-block loop.", source: source("City of Laramie — Optimist Park", "https://www.cityoflaramie.org/Facilities/Facility/Details/7") },
+    ],
+    attractionNotes: [
+      { name: "Vedauwoo & Ames Monument", note: "Billion-year-old granite hoodoos and a 60-ft Union Pacific pyramid, both a quick leashed-dog walk off I-80 — the day’s real payoff, already behind you by check-in.", source: source("US Forest Service — Vedauwoo Recreation Area", "https://www.fs.usda.gov/wildflowers/regions/Rocky_Mountain/VedauwooRecAreaPoleMtn/index.shtml") },
+    ],
+  },
+  {
+    city: "Park City",
+    headline: "Main Street at 7,000 ft is the evening reward — the Washington School House is the characterful pick, but it’s a real splurge.",
+    hotelStrategy: "Washington School House — an 1889 schoolhouse a block off Main Street, converted to a boutique hotel in 1984 and fully renovated in 2011 — is the characterful pick: up to 2 dogs under 45 lb, a $150 non-refundable pet fee, dog beds and bowls at the front desk. Be honest about the trade-off, though: rooms commonly run $500+/night in July, so this is a splurge, not a default. Hyatt Place Park City is the realistic fallback — a normal chain rate with a stated pet policy and a real pool, even if the dog can’t join at poolside.",
+    hotelTargets: [
+      { name: "Washington School House", note: "1889 schoolhouse building, hotel since 1984, fully renovated 2011 — a block off Main Street. Up to 2 dogs under 45 lb, $150 non-refundable pet fee, dog beds/bowls provided; well-behaved dogs may be left unattended. Rooms commonly run $500+/night in July — flag the price honestly before booking.", source: source("Visit Park City — dog-friendly accommodations", "https://www.visitparkcity.com/plan/dog-friendly-travel/accommodations-fit-for-your-best-friend/"), unique: true },
+      { name: "Hyatt Place Park City", note: "50-lb single dog / 75-lb combined for 2 dogs, $100 fee for 1-6 nights ($200 for longer stays), per Hyatt’s own policy page. Year-round outdoor pool, but pets aren’t allowed in the pool area or other public spaces. Matt Knoop Memorial Park and Willow Creek Park, both under a mile away, cover the evening dog walk.", source: source("Hyatt Place Park City — hotel policies", "https://www.hyatt.com/hyatt-place/en-US/slczp-hyatt-place-park-city/policies") },
+    ],
+    foodDrink: [
+      { name: "The Eating Establishment", note: "317 Main St — seats dogs at its sidewalk tables when weather permits, per its own BringFido listing and Visit Park City’s dog-friendly-patios page; good for dinner tonight or breakfast before Day 8.", source: source("BringFido — The Eating Establishment", "https://www.bringfido.com/restaurant/76539") },
+    ],
+    logistics: [
+      { name: "Main Street stroll", note: "Flat, stroller-friendly, and short enough for tired legs after the longest drive of the branch — no need to drive anywhere once you’re checked in.", source: source("Visit Park City", "https://www.visitparkcity.com/") },
+    ],
+    attractionNotes: [
+      { name: "Utah Olympic Park (tomorrow morning)", note: "Free 2002 Winter Olympics museums are the no-ticket win before the day’s push south; pets aren’t permitted anywhere on the grounds, so plan for the dog to stay at the hotel.", source: source("Utah Olympic Legacy Foundation — Utah Olympic Park", "https://utaholympiclegacy.org/location/utah-olympic-park/") },
+    ],
+  },
+  {
+    city: "Golden",
+    headline: "The Colorado fork’s first night lands right on Clear Creek — The Golden Hotel is the walkable, characterful pick.",
+    hotelStrategy: "The Golden Hotel sits in the heart of historic downtown Golden overlooking Clear Creek — dogs of any size up to 65 lb stay in the room, 2 per room, for a flat $35/night (confirmed directly on the hotel’s own policies page). There’s no pool on-site, but Lions Park and the Whitewater Park’s wading pools already covered the day’s cool-off before check-in. If it’s booked, TownePlace Suites Denver West/Federal Center is the practical alternate — same Golden address, a seasonal outdoor pool, and no weight limit, just a steeper fee.",
+    hotelTargets: [
+      { name: "The Golden Hotel, an Ascend Collection Hotel", note: "Historic downtown Golden, overlooking Clear Creek. Up to 2 pets, 65-lb weight limit, flat $35/night fee — confirmed on the hotel’s own policies page. Dogs cannot be left unattended in the room. No on-site pool.", source: source("The Golden Hotel — policies", "https://thegoldenhotel.com/policies/"), unique: true },
+      { name: "TownePlace Suites Denver West/Federal Center", note: "800 Tabor St, Golden — up to 2 pets of any size, $50/night not to exceed $200/stay reported; seasonal outdoor pool on-site.", source: source("BringFido — TownePlace Suites Denver West/Federal Center", "https://www.bringfido.com/lodging/69763") },
+    ],
+    foodDrink: [
+      { name: "Barrels & Bottles Brewery", note: "Golden brewpub with a large outdoor patio and an enclosed heated indoor patio, both welcoming dogs per the brewery’s own site; note the location moved to 1055 Orchard St (Camp George West), a short drive rather than a walk from downtown.", source: source("Barrels & Bottles Brewery — official site", "https://www.barrelsbottles.com/") },
+    ],
+    logistics: [
+      { name: "Clear Creek walking trail", note: "Accessible right from The Golden Hotel’s property — an easy, cool evening dog walk without moving the car.", source: source("The Golden Hotel — amenities", "https://thegoldenhotel.com/amenities/") },
+    ],
+    attractionNotes: [
+      { name: "Red Rocks Amphitheatre", note: "Free, iconic natural amphitheatre a short drive away; leashed dogs welcome outside of event hours — already the day’s highlight stop before check-in.", source: source("Red Rocks FAQ", "https://www.redrocksonline.com/plan-your-visit/faq/") },
+    ],
+  },
+  {
+    city: "Glenwood Springs",
+    headline: "The shortest driving day of the trip ends across the street from the hot springs, at an 1893 hotel with a real (if murky) teddy-bear legend.",
+    hotelStrategy: "Hotel Colorado is the character pick: an 1893 landmark directly across the street from Glenwood Hot Springs Pool, and — by the hotel’s own telling — the disputed birthplace of the teddy bear during Theodore Roosevelt’s 1905 stay (the hotel’s own fact-checking page admits Mississippi claims the same honor). Flag a real conflict here: the hotel’s own Doggy Destination package page caps dogs at 75 lb (2 max, pet fee bundled into the room rate), while its blog and aggregators cite “any size” for a flat $50/night — get the actual number in writing before booking. There’s no pool on-site, but the hotel’s own Splash & Crash package bundles a nightly hot-springs pool pass (a human-only amenity — the springs don’t address pets). Hampton Inn Glenwood Springs is the fallback with an on-site indoor pool instead.",
+    hotelTargets: [
+      { name: "Hotel Colorado", note: "1893 landmark across the street from Glenwood Hot Springs Pool; Historic Hotels of America member, National Register of Historic Places since 1977. Pet policy conflict: the hotel’s own Doggy Destination package page states a 75-lb, 2-dog limit with the pet fee included in the rate, while its blog and aggregators separately cite “any size” dogs for $50/pet/night — confirm the real terms before booking. No on-site pool; its own Splash & Crash package bundles a nightly Glenwood Hot Springs Pool pass instead (human-only).", source: source("Hotel Colorado — Doggy Destination Package", "https://www.hotelcolorado.com/packages/doggy-destination/"), unique: true },
+      { name: "Hampton Inn Glenwood Springs", note: "Indoor pool and hot tub on-site; up to 2 dogs, 75-lb weight limit, $75/stay for 1-4 nights ($125 for longer) reported.", source: source("BringFido — Hampton Inn Glenwood Springs", "https://www.bringfido.com/lodging/69741") },
+    ],
+    foodDrink: [
+      { name: "The Pullman", note: "Downtown dog-friendly patio (about six tables) per BringFido; upscale American menu — roasted chicken, steak, pasta — with an easy option for a toddler after the caverns-and-river afternoon.", source: source("BringFido — The Pullman", "https://www.bringfido.com/restaurant/88550") },
+    ],
+    logistics: [
+      { name: "Rio Grande Trail / Glenwood Springs Dog Park", note: "Both are easy add-ons south of the high school if the dog needs more than a hotel-block loop after the shorter driving day.", source: source("Visit Glenwood Springs", "https://visitglenwood.com/") },
+    ],
+    attractionNotes: [
+      { name: "Glenwood Caverns Adventure Park", note: "A gondola ride to a genuine 52°F cave system; pets aren’t allowed on the gondola, in the caves, or on rides, so plan for one adult and the dog to stay at Two Rivers Park while the other rides up.", source: source("Glenwood Caverns Adventure Park — pet policy", "https://www.glenwoodcaverns.com/pet-policy/") },
+    ],
+  },
+  {
+    city: "Cedar City",
+    headline: "Both branches converge here — no boutique dog-friendly stay verifies (the Big Yellow Inn doesn’t take pets), so lean on a pool and a firm weight limit instead.",
+    hotelStrategy: "Cedar City’s standout B&B, the Big Yellow Inn, does not allow dogs — multiple booking sources confirm it — so no characterful option verifies here, and chains are the honest play on this convergence night. SpringHill Suites Cedar City is the pick: any-size dogs, an on-site pool, and a reported $75/stay fee (though one source cites $50 — confirm at booking). La Quinta Cedar City is the budget-friendly backup with a firmer, cross-source-consistent number.",
+    hotelTargets: [
+      { name: "SpringHill Suites Cedar City", note: "Dogs of any size, up to 2 pets, on-site pool and hot tub (7am-11pm). Marriott’s own site lists a $75 non-refundable pet fee per stay, though some aggregators report $50 — confirm the current rate before booking.", source: source("BringFido — SpringHill Suites by Marriott Cedar City", "https://www.bringfido.com/lodging/96231") },
+      { name: "La Quinta by Wyndham Cedar City", note: "Up to 2 dogs of any size, $25/pet/night not to exceed $75/pet/stay, pool and hot tub on-site (pets not allowed poolside).", source: source("Romingo — La Quinta Inn & Suites by Wyndham Cedar City", "https://www.romingo.com/pet-friendly-hotel/utah/cedar-city/la-quinta-inn-suites-by-wyndham-cedar-city") },
+    ],
+    foodDrink: [
+      { name: "Cafe Sabor", note: "Dog-friendly outdoor patio per BringFido; Mexican and Tex-Mex menu — tacos, fajitas, quesadillas — that works easily for a toddler after three long driving days.", source: source("BringFido — Cafe Sabor", "https://www.bringfido.com/restaurant/97433") },
+    ],
+    logistics: [
+      { name: "West Canyon Park / Coal Creek Trail", note: "Already the evening’s cool-off before check-in; the same creek trail makes an easy last dog walk of the night.", source: source("Cedar City — West Canyon Park (Ann J. Gardner Park)", "https://www.cedarcityut.gov/239/West-Canyon-Park-Ann-J-Gardner") },
+    ],
+    attractionNotes: [
+      { name: "Cedar City Lighthouse", note: "An 88-ft lighthouse in a shopping-center parking lot, 350 miles from the ocean, slated for demolition around 2027 — a quick photo stop already behind you tonight.", source: source("KSL.com — Iconic Cedar City lighthouse set for demolition", "https://www.ksl.com/article/51382505/iconic-cedar-city-lighthouse-set-for-demolition-to-make-way-for-freeway-expansion") },
     ],
   },
 ];
