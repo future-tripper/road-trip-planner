@@ -23,7 +23,7 @@ const source = (label: string, url: string): Source => ({ label, url });
 
 const WYOMING = "wyoming-i80-main";
 const COLORADO = "colorado-i70-backup";
-const NEW_BOTH = [WYOMING, COLORADO];
+const BOTH = [WYOMING, COLORADO];
 
 // The reroute's shared trunk (nights 1-5), then the Wyoming/Colorado forks,
 // then the shared final desert day — combined into `days` below.
@@ -285,7 +285,7 @@ export const stops: Stop[] = [
     kidNote: "Pack a boredom kit within reach: snacks, favorite toys, and a tablet for the long PA/OH miles.",
     timeNeeded: "departure",
     website: "https://www.townofnorthbranfordct.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Town of North Branford", "https://www.townofnorthbranfordct.com/")],
   },
 
@@ -307,7 +307,7 @@ export const stops: Stop[] = [
     kidNote: "No dogs in the Powerhouse Park tot lot — split adults if your son wants playground time.",
     timeNeeded: "arrival",
     website: "https://www.delmar.ca.us/206/Dog-Friendly-Beaches",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Del Mar dog-friendly beaches", "https://www.delmar.ca.us/206/Dog-Friendly-Beaches"),
     ],
@@ -376,7 +376,7 @@ export const stops: Stop[] = [
     timeNeeded: "45 min-1 hr",
     dogVerify: true,
     website: "https://www.thatsamorebloomsburg.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("That’s Amore Pizzeria and Italian Restaurant", "https://www.thatsamorebloomsburg.com/"),
       source("BringFido — That’s Amore Pizzeria", "https://www.bringfido.com/restaurant/81686"),
@@ -398,7 +398,7 @@ export const stops: Stop[] = [
     dogNote: "Pets are not allowed on rides or in ride queues — one adult walks the shaded grounds with the dog while the other rides.",
     dogVerify: true,
     timeNeeded: "1.5–2 hrs",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "tudek-park-state-college",
@@ -416,7 +416,7 @@ export const stops: Stop[] = [
     kidNote: "Two separate playgrounds — one built for ages 3-5 — plus a flat 1.3-mile loop if anyone still has energy to burn.",
     timeNeeded: "45 min-1 hr",
     website: "https://www.centredoutdoors.org/visit/tom-tudek-memorial-park",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Centre Region Parks & Rec — Tom Tudek Memorial Park", "https://www.centredoutdoors.org/visit/tom-tudek-memorial-park")],
   },
   {
@@ -435,7 +435,7 @@ export const stops: Stop[] = [
     kidNote: "The Creamery’s outdoor patio (dog-friendly, order inside) is an easy reward if there’s still energy for one more stop.",
     timeNeeded: "overnight",
     website: "https://visitpennstate.org/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Visit Penn State / Happy Valley", "https://visitpennstate.org/"),
       source("Penn State Berkey Creamery — Visit", "https://creamery.psu.edu/visit"),
@@ -459,7 +459,7 @@ export const stops: Stop[] = [
     timeNeeded: "45 min-1 hr",
     dogVerify: true,
     website: "http://station101pub.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Station 101 Pub & Kitchen", "http://station101pub.com/"),
       source("BringFido — Station 101 Pub & Kitchen", "https://www.bringfido.com/restaurant/83113"),
@@ -481,7 +481,7 @@ export const stops: Stop[] = [
     kidNote: "Seeing “the real groundhog” through the glass is a fast, memorable win for a 3.5-year-old; step inside too if the library’s open and you want a closer look.",
     timeNeeded: "20-30 min",
     website: "https://www.punxsutawneylibrary.org/about.html",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Punxsutawney Memorial Library — About / Phil’s Burrow", "https://www.punxsutawneylibrary.org/about.html")],
   },
   {
@@ -501,7 +501,7 @@ export const stops: Stop[] = [
     kidNote: "The leg lamp and the exterior are the whole draw for a 3.5-year-old; skip the paid tour unless there’s real interest.",
     timeNeeded: "15-20 min",
     website: "https://housefromachristmasstory.com/visit/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("House From A Christmas Story — Visit", "https://housefromachristmasstory.com/visit/"),
       source("House From A Christmas Story — Pet Policy FAQ", "https://housefromachristmasstory.com/spend-the-night/faqs/"),
@@ -523,7 +523,7 @@ export const stops: Stop[] = [
     kidNote: "Shallow lake-edge wading and a play area nearby make this an easy evening stop for a tired 3.5-year-old too.",
     timeNeeded: "45 min-1 hr",
     website: "https://www.clevelandmetroparks.com/parks/visit/parks/lakefront-reservation/edgewater-beach",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Cleveland Metroparks — Edgewater Beach", "https://www.clevelandmetroparks.com/parks/visit/parks/lakefront-reservation/edgewater-beach")],
   },
   {
@@ -542,7 +542,7 @@ export const stops: Stop[] = [
     kidNote: "A pool break at the hotel is a good landing pad after two big travel days in a row.",
     timeNeeded: "overnight",
     website: "https://www.thisiscleveland.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("This is Cleveland", "https://www.thisiscleveland.com/")],
   },
 
@@ -569,7 +569,7 @@ export const stops: Stop[] = [
     kidNote: "Room after room of RVs a 3.5-year-old can peek into — climbing inside isn't allowed, but the scale alone is a hit.",
     timeNeeded: "45-60 min",
     dogVerify: true,
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "chubby-trout-elkhart-in",
@@ -589,7 +589,7 @@ export const stops: Stop[] = [
     timeNeeded: "45-60 min",
     dogVerify: true,
     website: "https://chubbytrout.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("The Chubby Trout", "https://chubbytrout.com/"),
       source("BringFido — Chubby Trout", "https://www.bringfido.com/restaurant/94488"),
@@ -612,11 +612,11 @@ export const stops: Stop[] = [
     state: "IN",
     category: "kid-museum",
     dogNote: "The museum's own visitor page states plainly: \"Service animals are welcome in the Museum. Pets are not permitted.\" Plan for one adult to tour while the other waits with the dog in the AC car, or split with the Elkhart RV museum stop instead.",
-    kidNote: "Real horse-drawn carriages and shiny old cars at a scale a 3.5-year-old can walk right up to — the Lincoln funeral-carriage story is more for the adults.",
+    kidNote: "Real horse-drawn carriages and shiny old cars at a scale a 3.5-year-old can walk right up to — the carriage from the night Lincoln was shot is more a story for the adults.",
     timeNeeded: "45-60 min",
     dogVerify: true,
     website: "https://studebakermuseum.org/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "indiana-dunes-central-beach-in",
@@ -634,7 +634,7 @@ export const stops: Stop[] = [
     timeNeeded: "45-60 min",
     dogVerify: true,
     website: "https://www.nps.gov/indu/planyourvisit/central-beach.htm",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("NPS — Central Avenue Beach", "https://www.nps.gov/indu/planyourvisit/central-beach.htm"),
       source("NPS — Pets at Indiana Dunes", "https://www.nps.gov/indu/planyourvisit/pets.htm"),
@@ -657,7 +657,7 @@ export const stops: Stop[] = [
     kidNote: "The warped reflection of themselves and the skyline is an instant hit; there’s no need to linger past the photo.",
     timeNeeded: "15-20 min",
     website: "https://www.chicago.gov/city/en/depts/dca/supp_info/millennium_park.html",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("City of Chicago — Millennium Park", "https://www.chicago.gov/city/en/depts/dca/supp_info/millennium_park.html"),
       source("Chicago Dog Walkers — Grant Park vs. Millennium Park", "https://www.chicago-dogwalkers.com/blog/can-i-bring-my-dog-to-grant-park-or-millennium-park-heres-what-you-need-to-know"),
@@ -679,7 +679,7 @@ export const stops: Stop[] = [
     kidNote: "The Watering Hole and The Harbor zones are both built for ages 2-5 — animal-themed spray features and a boat you can actually climb into, no big-kid slides required.",
     timeNeeded: "45-60 min",
     website: "https://maggiedaleypark.com/things-to-do/play-garden/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Maggie Daley Park — Play Garden", "https://maggiedaleypark.com/things-to-do/play-garden/"),
       source("NBC Chicago — Park District bans dogs from Maggie Daley Park", "https://www.nbcchicago.com/news/local/park-district-bans-dogs-from-maggie-daley-park/59865/"),
@@ -701,7 +701,7 @@ export const stops: Stop[] = [
     kidNote: "\"Why is it falling over?\" is good for a solid five minutes of conversation on the way to bed.",
     timeNeeded: "15-20 min",
     website: "https://www.vniles.com/883/Leaning-Tower-of-Niles",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Village of Niles — Leaning Tower of Niles", "https://www.vniles.com/883/Leaning-Tower-of-Niles"),
       source("Wikipedia — Leaning Tower of Niles", "https://en.wikipedia.org/wiki/Leaning_Tower_of_Niles"),
@@ -723,7 +723,7 @@ export const stops: Stop[] = [
     kidNote: "A pool break is a good reset after Cloud Gate, Maggie Daley, and a full driving day.",
     timeNeeded: "overnight",
     website: "https://www.choosechicago.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Choose Chicago", "https://www.choosechicago.com/")],
   },
 
@@ -747,7 +747,7 @@ export const stops: Stop[] = [
     timeNeeded: "45-60 min",
     dogVerify: true,
     website: "https://iowa80truckstop.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Iowa 80 Truckstop — Eat", "https://iowa80truckstop.com/eat/"),
       source("Iowa 80 Truckstop — Dog Stop dog park", "https://iowa80truckstop.com/services-amenities/amenities/dog-stop/"),
@@ -769,7 +769,7 @@ export const stops: Stop[] = [
     kidNote: "Reads as \"a spaceship\" to a 3.5-year-old, which is plenty — a 10-15 min stretch break, not a destination.",
     timeNeeded: "15-20 min",
     website: "https://www.riversideiowa.gov/community/attractions/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("City of Riverside, Iowa — Attractions", "https://www.riversideiowa.gov/community/attractions/"),
       source("Trek Central — Riverside, Iowa", "https://trekcentral.net/riverside-iowa-honors-the-legacy-of-kirk-by-proclaiming-itself-as-the-future-birthplace-of-the-fictional-character-the-town-hosts-trek-fest-every-june-to-celebrate-kirks-i/"),
@@ -791,7 +791,7 @@ export const stops: Stop[] = [
     kidNote: "The birthplace cottage is a two-minute look, not a museum visit — better as a leg-stretch than a planned stop with a toddler in tow.",
     timeNeeded: "20-30 min",
     website: "https://www.nps.gov/heho/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("NPS — Herbert Hoover NHS pets", "https://www.nps.gov/heho/planyourvisit/pets.htm"),
       source("NPS — Herbert Hoover NHS directions", "https://www.nps.gov/heho/planyourvisit/directions.htm"),
@@ -814,7 +814,7 @@ export const stops: Stop[] = [
     timeNeeded: "30-45 min",
     dogVerify: true,
     website: "https://desmoinesartcenter.org/visit/pappajohn-sculpture-park/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Des Moines Art Center — Pappajohn Sculpture Park", "https://desmoinesartcenter.org/visit/pappajohn-sculpture-park/"),
       source("BringFido — Pappajohn Sculpture Park", "https://www.bringfido.com/attraction/16237"),
@@ -837,7 +837,7 @@ export const stops: Stop[] = [
     timeNeeded: "45-60 min",
     dogVerify: true,
     website: "https://heritagecarousel.org/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("Heritage Carousel — Location & Hours", "https://heritagecarousel.org/location-hours"),
       source("Des Moines Parks & Rec — Union Park", "https://www.dsm.city/Union_Park402.php"),
@@ -859,7 +859,7 @@ export const stops: Stop[] = [
     kidNote: "A pool break plus the carousel earlier in the evening should be enough to get a tired 3.5-year-old down without a fight.",
     timeNeeded: "overnight",
     website: "https://www.catchdesmoines.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Catch Des Moines — pet-friendly", "https://www.catchdesmoines.com/things-to-do/pet-friendly/")],
   },
 
@@ -882,7 +882,7 @@ export const stops: Stop[] = [
     timeNeeded: "20-30 min",
     dogVerify: true,
     website: "https://www.danishwindmill.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Danish Windmill — official site", "https://www.danishwindmill.com/")],
   },
   {
@@ -903,7 +903,7 @@ export const stops: Stop[] = [
     timeNeeded: "45-60 min",
     dogVerify: true,
     website: "https://lazlosbreweryandgrill.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("BringFido — Lazlo’s Brewery and Grill", "https://www.bringfido.com/restaurant/19726"),
       source("Lazlo’s Brewery and Grill — Locations & Hours", "https://lazlosbreweryandgrill.com/locations-and-hours/"),
@@ -925,7 +925,7 @@ export const stops: Stop[] = [
     dogNote: "Indoor museum — dogs wait out the visit; there’s green space below for a leg stretch.",
     dogVerify: true,
     timeNeeded: "1 hr",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "yanney-heritage-park-kearney-ne",
@@ -943,7 +943,7 @@ export const stops: Stop[] = [
     kidNote: "The splash pad is the day’s real cool-off after the drive; the Gottschalk observation tower is a fun five-minute climb if there’s energy left.",
     timeNeeded: "45-60 min",
     website: "https://www.yanneypark.org/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [
       source("City of Kearney — Yanney Heritage Park", "https://www.cityofkearney.org/1893/Yanney-Heritage-Park"),
       source("BringFido — Yanney Heritage Park", "https://www.bringfido.com/attraction/38685"),
@@ -965,7 +965,7 @@ export const stops: Stop[] = [
     kidNote: "A splash-pad afternoon at Yanney plus the Archway should make for an easy bedtime after five straight travel days.",
     timeNeeded: "overnight",
     website: "https://visitkearney.org/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Visit Kearney Nebraska", "https://visitkearney.org/")],
   },
 
@@ -992,7 +992,7 @@ export const stops: Stop[] = [
     kidNote: "Live freight trains switching cars directly below the deck — a moving-train view most kids have never had.",
     dogVerify: true,
     timeNeeded: "30-45 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "oles-big-game-paxton-ne",
@@ -1014,7 +1014,7 @@ export const stops: Stop[] = [
     kidNote: "Wall-to-wall taxidermy (lions, polar bears, a hippo) is genuinely startling for a kid — worth the five-minute detour even without eating.",
     dogVerify: true,
     timeNeeded: "15-20 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "t-joes-cheyenne-wy",
@@ -1304,7 +1304,7 @@ export const stops: Stop[] = [
     kidNote: "Docents in period dress lead you through real 1860s rooms — a good stretch break with a story attached.",
     dogVerify: true,
     timeNeeded: "30-45 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "the-creamery-beaver-ut",
@@ -1327,7 +1327,7 @@ export const stops: Stop[] = [
     kidNote: "Ice cream and squeaky cheese curds from the family farm next door — a fun, low-key lunch stop.",
     dogVerify: true,
     timeNeeded: "30-45 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "west-canyon-park-cedar-city-ut",
@@ -1349,7 +1349,7 @@ export const stops: Stop[] = [
     kidNote: "Cold creek water plus the Coal Creek Trail right there for a post-splash walk.",
     dogVerify: true,
     timeNeeded: "30-45 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "cedar-city-lighthouse-ut",
@@ -1375,7 +1375,7 @@ export const stops: Stop[] = [
     timeNeeded: "10-15 min",
     dogVerify: true,
     website: "https://cedarcitylighthouse.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "cedar-city-ut",
@@ -1393,7 +1393,7 @@ export const stops: Stop[] = [
     kidNote: "After three long driving days in a row, an early dinner and a splash in the creek beat any evening activity.",
     timeNeeded: "overnight",
     website: "https://visitcedarcity.com/",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
     sources: [source("Visit Cedar City", "https://visitcedarcity.com/")],
   },
   {
@@ -1414,7 +1414,7 @@ export const stops: Stop[] = [
     dogNote: "Leashed dogs (6-ft max) are welcome on all paved overlooks, parking lots, and the Sunset Trail — not on unpaved trails or inside buildings.",
     timeNeeded: "45-60 min",
     optional: true,
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
 
   // =============================================================
@@ -1605,7 +1605,7 @@ export const stops: Stop[] = [
     dogNote: "Leashed dogs are welcome at the picnic sites and the river path.",
     kidNote: "Wading the shallow river edge is a genuine, free cool-off — worth the fee just for that.",
     timeNeeded: "15 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "lazy-dog-town-square-las-vegas-nv",
@@ -1628,7 +1628,7 @@ export const stops: Stop[] = [
     kidNote: "A full American menu with a real kids’ section — a proper meal, not just a snack stop, before the long desert stretch ahead.",
     dogVerify: true,
     timeNeeded: "45-60 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "seven-magic-mountains-nv",
@@ -1644,7 +1644,7 @@ export const stops: Stop[] = [
     category: "photo-stop",
     dogNote: "Open desert site, dogs on leash fine — but the ground is griddle-hot by midday; paws need booties or a strict time limit.",
     timeNeeded: "10-15 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "alien-jerky-thermometer-baker-ca",
@@ -1666,7 +1666,7 @@ export const stops: Stop[] = [
     kidNote: "Alien statues, a spaceship out front, and free samples inside if you do go in — a fun, fast wake-up after the highway miles.",
     dogVerify: true,
     timeNeeded: "10-15 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "peggy-sues-diner-yermo-ca",
@@ -1688,7 +1688,7 @@ export const stops: Stop[] = [
     kidNote: "Giant dinosaurs and koi ponds to explore are a bigger hit than the diner itself for a 3.5-year-old.",
     dogVerify: true,
     timeNeeded: "15 min",
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
   {
     id: "zzyzx-road-mineral-springs-ca",
@@ -1711,7 +1711,7 @@ export const stops: Stop[] = [
     timeNeeded: "30-45 min including the access road",
     dogVerify: true,
     optional: true,
-    routeIds: NEW_BOTH,
+    routeIds: BOTH,
   },
 ];
 
@@ -2052,15 +2052,15 @@ export interface ConditionPoint {
 }
 
 export const conditionPoints: ConditionPoint[] = [
-  { id: "state-college", name: "State College", routeIds: NEW_BOTH, lat: 40.7934, lng: -77.8600 },
-  { id: "cleveland", name: "Cleveland", routeIds: NEW_BOTH, lat: 41.4993, lng: -81.6944 },
-  { id: "chicago", name: "Chicago", routeIds: NEW_BOTH, lat: 41.8781, lng: -87.6298 },
-  { id: "des-moines", name: "Des Moines", routeIds: NEW_BOTH, lat: 41.5868, lng: -93.6250 },
-  { id: "kearney", name: "Kearney", routeIds: NEW_BOTH, lat: 40.6993, lng: -99.0817 },
+  { id: "state-college", name: "State College", routeIds: BOTH, lat: 40.7934, lng: -77.8600 },
+  { id: "cleveland", name: "Cleveland", routeIds: BOTH, lat: 41.4993, lng: -81.6944 },
+  { id: "chicago", name: "Chicago", routeIds: BOTH, lat: 41.8781, lng: -87.6298 },
+  { id: "des-moines", name: "Des Moines", routeIds: BOTH, lat: 41.5868, lng: -93.6250 },
+  { id: "kearney", name: "Kearney", routeIds: BOTH, lat: 40.6993, lng: -99.0817 },
   { id: "laramie", name: "Laramie", routeIds: [WYOMING], lat: 41.3114, lng: -105.5911 },
   { id: "park-city", name: "Park City", routeIds: [WYOMING], lat: 40.6461, lng: -111.4980 },
   { id: "golden", name: "Golden", routeIds: [COLORADO], lat: 39.7555, lng: -105.2211 },
   { id: "glenwood-springs", name: "Glenwood Springs", routeIds: [COLORADO], lat: 39.5505, lng: -107.3248 },
-  { id: "cedar-city", name: "Cedar City", routeIds: NEW_BOTH, lat: 37.6775, lng: -113.0619 },
-  { id: "del-mar", name: "Del Mar", routeIds: NEW_BOTH, lat: 32.9595, lng: -117.2653 },
+  { id: "cedar-city", name: "Cedar City", routeIds: BOTH, lat: 37.6775, lng: -113.0619 },
+  { id: "del-mar", name: "Del Mar", routeIds: BOTH, lat: 32.9595, lng: -117.2653 },
 ];

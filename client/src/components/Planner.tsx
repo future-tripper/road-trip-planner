@@ -357,7 +357,7 @@ function JumpChip({ onClick, testid, Icon, label }: { onClick: () => void; testi
 }
 
 function RouteSwitcher() {
-  const { selectedRouteId, setSelectedRouteId, setActiveDayId, setSelectedPlaceId, setActiveStopId } = useTrip();
+  const { selectedRouteId, setSelectedRouteId, activeDayId, setActiveDayId, setSelectedPlaceId, setActiveStopId } = useTrip();
   // Collapsed on phones so the day fills the screen; always open on desktop (lg).
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState(false);
@@ -401,7 +401,12 @@ function RouteSwitcher() {
                 type="button"
                 onClick={() => {
                   setSelectedRouteId(route.id);
-                  setActiveDayId(route.dayIds[0] ?? null);
+                  // Shared trunk/final days exist on both routes — if the open
+                  // day is one of them, stay put instead of jumping back to
+                  // day 1. Otherwise (a branch-only day) fall back as before.
+                  setActiveDayId(
+                    activeDayId && route.dayIds.includes(activeDayId) ? activeDayId : (route.dayIds[0] ?? null),
+                  );
                   // Clear any place selected on the previous route — it may not
                   // exist on this one, which left a stale info panel showing.
                   setSelectedPlaceId(null);
@@ -1672,21 +1677,28 @@ function SavedSelectedStrip() {
   );
 }
 
+function KearneyPointer() {
+  const { setPlannerTab } = useTrip();
+  return (
+    <button
+      type="button"
+      onClick={() => setPlannerTab("conditions")}
+      data-testid="link-kearney-decision"
+      className="flex w-full items-center gap-1.5 border-b border-border px-3 py-2 text-left text-xs text-primary hover-elevate"
+    >
+      <Signpost className="h-3.5 w-3.5" /> Wyoming or Colorado? The Jul 26 Kearney go/no-go lives on the Live tab →
+    </button>
+  );
+}
+
 function SavedPane() {
-  const { saved, toggleSaved, setPlannerTab } = useTrip();
+  const { saved, toggleSaved } = useTrip();
   const list = stops.filter(s => saved.has(s.id));
   if (list.length === 0) {
     return (
       <div>
         <SavedSelectedStrip />
-        <button
-          type="button"
-          onClick={() => setPlannerTab("conditions")}
-          data-testid="link-kearney-decision"
-          className="flex w-full items-center gap-1.5 border-b border-border px-3 py-2 text-left text-xs text-primary hover-elevate"
-        >
-          <Signpost className="h-3.5 w-3.5" /> Wyoming or Colorado? The Jul 26 Kearney go/no-go lives on the Live tab →
-        </button>
+        <KearneyPointer />
         <div className="flex flex-col items-center px-6 py-16 text-center">
           <MapPin className="h-10 w-10 text-muted-foreground/40" />
           <h3 className="mt-3 font-serif text-lg">No saved stops yet</h3>
@@ -1700,14 +1712,7 @@ function SavedPane() {
   return (
     <div>
       <SavedSelectedStrip />
-      <button
-        type="button"
-        onClick={() => setPlannerTab("conditions")}
-        data-testid="link-kearney-decision"
-        className="flex w-full items-center gap-1.5 border-b border-border px-3 py-2 text-left text-xs text-primary hover-elevate"
-      >
-        <Signpost className="h-3.5 w-3.5" /> Wyoming or Colorado? The Jul 26 Kearney go/no-go lives on the Live tab →
-      </button>
+      <KearneyPointer />
       <div className="flex items-center justify-between border-b border-border p-3">
         <span className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground" data-testid="text-saved-count">
           {list.length} stop{list.length === 1 ? "" : "s"} in your plan
