@@ -965,6 +965,9 @@ function StopCard({ stop, compact }: { stop: Stop; compact?: boolean }) {
               {stop.lunch && (
                 <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[12px] uppercase tracking-wider text-accent">lunch stop</span>
               )}
+              {stop.optional && (
+                <span className="rounded-full border border-dashed border-muted-foreground/50 px-1.5 py-0.5 text-[12px] uppercase tracking-wider text-muted-foreground">optional detour</span>
+              )}
               <span className="text-[12px] uppercase tracking-wider text-muted-foreground">{stop.kind}</span>
             </span>
           </div>
@@ -1099,7 +1102,10 @@ function StopsPane() {
   const { filters, selectedRouteId, selectedPlaceId, setSelectedPlaceId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const routeIds = routeDays(selectedRoute).flatMap(d => d.stopIds);
-  const uniqueIds = Array.from(new Set(routeIds));
+  // Bonus/optional detours aren't on any day's stopIds (they're off-polyline
+  // map extras), so they need to be folded in here too or they'd never show
+  // up in the "All stops" list.
+  const uniqueIds = Array.from(new Set([...routeIds, ...(selectedRoute.bonusStopIds ?? [])]));
   const routeStops = uniqueIds.map(id => stops.find(s => s.id === id)).filter((s): s is Stop => !!s);
   const filtered = useMemo(() => routeStops.filter(s => matchesFilters(s, filters)), [filters, routeStops]);
 
