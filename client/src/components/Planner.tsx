@@ -20,7 +20,7 @@ import {
   Bone, Mountain, Sparkles, Trees, Bed, UtensilsCrossed, Baby, Clock,
   Sun, X, ExternalLink, Check, Plus, ChevronRight, MapPin, Trash2, Hotel,
   Flame, CloudSun, AlertTriangle, Wind, RefreshCw, Dog, Martini, MapPinned, CarFront,
-  ChevronDown,
+  ChevronDown, Signpost,
 } from "lucide-react";
 
 const TAG_DEFS: { tag: Tag; label: string; Icon: any }[] = [
@@ -1356,6 +1356,49 @@ function BookingSection({ title, Icon, items, city, testid }: { title: string; I
   );
 }
 
+// The Jul 26 fork: decided in Kearney the night before the western branches split.
+// Static guidance card — the live signals it references are the hazards board below it.
+function KearneyDecisionCard() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-border bg-card p-3" data-testid="kearney-decision-card">
+      <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
+        <Signpost className="h-3.5 w-3.5" /> The Kearney decision — evening of Jul 26
+      </div>
+      <p className="mt-1.5 text-xs text-foreground/90">
+        Both branches share the first five nights. In Kearney, pick:
+        <strong> Wyoming (default)</strong> unless Colorado is clearly ordinary —
+        I-70 fully open, acceptable air quality, and no Moderate/High
+        excessive-rainfall outlook over western Colorado.
+      </p>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        data-testid="button-decision-thresholds"
+        className="mt-2 inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
+      >
+        {open ? "Hide" : "Show"} reroute/delay thresholds
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-foreground/90">
+          <li>Don't reroute over a "Marginal" or "Slight" label on a big regional map.</li>
+          <li>Do change or delay for: an active road closure, evacuation order, or fire incident on the highway.</li>
+          <li>A WPC Moderate or High excessive-rainfall risk over a mountain or canyon segment.</li>
+          <li>An active tornado warning, or an organized severe-weather watch covering hours of the route.</li>
+          <li>Smoke pushing air quality to unhealthy around planned outdoor stops.</li>
+          <li>A heat warning combined with unreliable vehicle A/C.</li>
+        </ul>
+      )}
+      <p className="mt-2 text-xs text-muted-foreground">
+        Check the hazards board below for both branches before deciding — switch the
+        trip plan above to compare Wyoming vs Colorado look-aheads.
+      </p>
+    </div>
+  );
+}
+
 function ConditionsPane() {
   const { selectedRouteId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
@@ -1373,6 +1416,7 @@ function ConditionsPane() {
       <div className="border-b border-border bg-accent/10 p-3 text-xs text-foreground" data-testid="conditions-note">
         <strong>Live planning layer.</strong> {data?.forecastCoverageNote ?? "Weather forecasts, active alerts, and wildfire links load here for the selected route."}
       </div>
+      <KearneyDecisionCard />
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
         <div>
           <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Conditions for</div>
@@ -1619,12 +1663,20 @@ function SavedSelectedStrip() {
 }
 
 function SavedPane() {
-  const { saved, toggleSaved } = useTrip();
+  const { saved, toggleSaved, setPlannerTab } = useTrip();
   const list = stops.filter(s => saved.has(s.id));
   if (list.length === 0) {
     return (
       <div>
         <SavedSelectedStrip />
+        <button
+          type="button"
+          onClick={() => setPlannerTab("conditions")}
+          data-testid="link-kearney-decision"
+          className="flex w-full items-center gap-1.5 border-b border-border px-3 py-2 text-left text-xs text-primary hover-elevate"
+        >
+          <Signpost className="h-3.5 w-3.5" /> Wyoming or Colorado? The Jul 26 Kearney go/no-go lives on the Live tab →
+        </button>
         <div className="flex flex-col items-center px-6 py-16 text-center">
           <MapPin className="h-10 w-10 text-muted-foreground/40" />
           <h3 className="mt-3 font-serif text-lg">No saved stops yet</h3>
@@ -1638,6 +1690,14 @@ function SavedPane() {
   return (
     <div>
       <SavedSelectedStrip />
+      <button
+        type="button"
+        onClick={() => setPlannerTab("conditions")}
+        data-testid="link-kearney-decision"
+        className="flex w-full items-center gap-1.5 border-b border-border px-3 py-2 text-left text-xs text-primary hover-elevate"
+      >
+        <Signpost className="h-3.5 w-3.5" /> Wyoming or Colorado? The Jul 26 Kearney go/no-go lives on the Live tab →
+      </button>
       <div className="flex items-center justify-between border-b border-border p-3">
         <span className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground" data-testid="text-saved-count">
           {list.length} stop{list.length === 1 ? "" : "s"} in your plan
