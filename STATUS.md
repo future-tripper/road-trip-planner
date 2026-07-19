@@ -23,11 +23,11 @@ Family road-trip planner web app for a Connecticut → Del Mar, CA drive (July 2
 
 ## Current Work
 
-- The I-80 reroute (routes, data, decision card, copy pass, data-integrity script) is complete on the `i80-reroute` branch and **not yet merged or pushed**. `main` still reflects the pre-reroute app.
+- None in flight. The I-80 reroute (routes, data, decision card, copy pass, data-integrity script) is merged to `main` and deployed.
 
 ## Blockers and Open Questions
 
-- None technical. The reroute work needs to be merged to `main` before it deploys — GitHub Pages only auto-fires on push to `main`, so nothing above is live yet.
+- None. Note: weather/AQI/NWS data is live and time-varying; forecasts for Jul 22-30 fill in as dates enter Open-Meteo's rolling 16-day window.
 - Weather/AQI/NWS data is live and time-varying; trip-date forecasts fill in as each date enters Open-Meteo's rolling 16-day window.
 
 ## Important Artifacts
@@ -47,12 +47,12 @@ Family road-trip planner web app for a Connecticut → Del Mar, CA drive (July 2
 - Run locally: `PORT=5599 npm run dev` (port 5000 is taken by macOS AirPlay).
 - Typecheck / build: `npx tsc --noEmit` / `npx vite build` (output `dist/public`).
 - Data integrity: `npm run check:data`.
-- Deploy: push to `main` → the Actions workflow builds and publishes to Pages (~40s). Work on `i80-reroute` will not deploy until it's merged/pushed to `main`.
+- Deploy: push to `main` → the Actions workflow builds and publishes to Pages (~40s).
 - Bump the `VERSION` constant in `client/public/sw.js` when service-worker caching behavior changes (currently `v2`).
 
 ## Next Action
 
-Merge/push `i80-reroute` to `main` to make the new I-80 plan live before the trip departs Jul 22. After that, no further work is required for the trip itself; possible follow-ups if asked: weave the new stops into day-summary prose, add per-stop hazard context, packing-list tweaks.
+Nothing required — the new plan is live for the Jul 22 departure. On the evening of Jul 26 in Kearney, use the Live tab's decision card to pick Wyoming (default) or Colorado. Possible follow-ups if asked: weave new stops into day-summary prose, per-stop hazard context, packing-list tweaks.
 
 ## Read First
 
