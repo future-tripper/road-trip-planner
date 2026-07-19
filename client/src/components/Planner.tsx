@@ -378,7 +378,7 @@ function RouteSwitcher() {
         className="flex w-full items-center justify-between gap-3 p-3 text-left hover-elevate lg:pointer-events-none"
       >
         <div className="min-w-0">
-          <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Route</div>
+          <div className="text-[13px] uppercase tracking-[0.12em] text-muted-foreground">Trip plan</div>
           <div className="mt-0.5 flex items-center gap-2 text-sm font-semibold" data-testid="text-selected-route-compact">
             <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colorFor(active.color) }} />
             <span className="truncate">{active.name}</span>
