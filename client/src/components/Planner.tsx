@@ -357,7 +357,7 @@ function JumpChip({ onClick, testid, Icon, label }: { onClick: () => void; testi
 }
 
 function RouteSwitcher() {
-  const { selectedRouteId, setSelectedRouteId, setActiveDayId } = useTrip();
+  const { selectedRouteId, setSelectedRouteId, setActiveDayId, setSelectedPlaceId, setActiveStopId } = useTrip();
   // Collapsed on phones so the day fills the screen; always open on desktop (lg).
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState(false);
@@ -402,6 +402,10 @@ function RouteSwitcher() {
                 onClick={() => {
                   setSelectedRouteId(route.id);
                   setActiveDayId(route.dayIds[0] ?? null);
+                  // Clear any place selected on the previous route — it may not
+                  // exist on this one, which left a stale info panel showing.
+                  setSelectedPlaceId(null);
+                  setActiveStopId(null);
                 }}
                 data-testid={`button-route-${route.id}`}
                 className={`rounded-md border px-3 py-2 text-left hover-elevate ${

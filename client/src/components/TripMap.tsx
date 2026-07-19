@@ -55,6 +55,23 @@ export function TripMap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoute]);
 
+  // The other route's branch-only days (trunk + final day are shared, so diffing
+  // out the selected route's day ids leaves just the diverging leg) — drawn as a
+  // dashed comparison line so the map shows what the fork gives up either way.
+  const otherBranchStops = useMemo(() => {
+    const otherRoute = routes.find(r => r.id !== selectedRoute.id);
+    if (!otherRoute) return [] as Stop[];
+    const branchOnlyDayIds = otherRoute.dayIds.filter(id => !selectedRoute.dayIds.includes(id));
+    const otherDays = branchOnlyDayIds
+      .map(id => allDays.find(d => d.id === id))
+      .filter((d): d is Day => !!d);
+    const orderedIds: string[] = [];
+    const seen = new Set<string>();
+    otherDays.forEach(d => d.stopIds.forEach(id => { if (!seen.has(id)) { seen.add(id); orderedIds.push(id); } }));
+    return orderedIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoute]);
+
   // Keep the latest route stops / active day reachable from the mount-only effect.
   const selectedStopsRef = useRef(selectedStops);
   selectedStopsRef.current = selectedStops;
@@ -157,6 +174,22 @@ export function TripMap() {
       }
     }
 
+    // other-branch comparison line — the fixed blue from the legend swatch, not
+    // routeColor(), so it stays visually distinct from "today's drive" no matter
+    // which route is selected.
+    if (altLineRef.current) { altLineRef.current.remove(); }
+    if (otherBranchStops.length > 1 && altLayerRef.current) {
+      altLineRef.current = L.polyline(otherBranchStops.map(s => [s.lat, s.lng]), {
+        color: "hsl(200 40% 38%)",
+        opacity: 0.6,
+        weight: 3,
+        dashArray: "4 8",
+        lineCap: "round",
+      }).addTo(altLayerRef.current);
+    } else {
+      altLineRef.current = null;
+    }
+
     // markers
     const dayStopIds = new Set<string>();
     if (activeDayId) {
@@ -207,7 +240,7 @@ export function TripMap() {
     // NOTE: no fitBounds here — this effect re-runs when selectedStops / the day
     // changes; refitting would fight the day-pan and zoom the map back out.
     // Framing is owned by the initial-fit observer and the day-pan effect.
-  }, [selectedStops, selectedRoute, activeDayId, activeStopId, selectedPlaceId, saved, setActiveStopId, setSelectedPlaceId, toggleSaved]);
+  }, [selectedStops, otherBranchStops, selectedRoute, activeDayId, activeStopId, selectedPlaceId, saved, setActiveStopId, setSelectedPlaceId, toggleSaved]);
 
   // pan to active day
   useEffect(() => {
