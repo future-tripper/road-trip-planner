@@ -1,14 +1,11 @@
 // Data-integrity checks for the trip data. Run: npm run check:data
-// Deep checks are skipped for the legacy routes (they're being replaced);
-// the LEGACY set and pendingDayGroups plumbing are deleted in the swap task.
 import {
-  allDays, conditionPoints, hotels, pendingDayGroups, routes, stops,
+  allDays, conditionPoints, hotels, routes, stops,
   type Day, type Route,
 } from "../client/src/data/julyTrip";
 
 const stopById = new Map(stops.map(s => [s.id, s]));
 const dayById = new Map(allDays.map(d => [d.id, d]));
-const LEGACY = new Set(["rockies-utah-grand-canyon-10", "route66-grand-canyon-10"]);
 // New-plan days intentionally allowed to differ from the one-lunch rule.
 const LUNCH_EXCEPTIONS = new Set<string>([]);
 
@@ -72,10 +69,9 @@ function checkRoute(route: Route, deep: boolean) {
   for (const bid of route.bonusStopIds ?? []) if (!stopById.has(bid)) fail(`${route.id}: unknown bonus stop "${bid}"`);
 }
 
-for (const r of routes) checkRoute(r, !LEGACY.has(r.id));
-for (const group of pendingDayGroups) for (const d of group) checkDay(d);
+for (const r of routes) checkRoute(r, true);
 
-// Fork-model shape, once the new routes are live.
+// Fork-model shape: both routes share the trunk (nights 1-5) and the final day.
 const wy = routes.find(r => r.id === "wyoming-i80-main");
 const co = routes.find(r => r.id === "colorado-i70-backup");
 if (wy && co) {
@@ -87,4 +83,4 @@ if (wy && co) {
 }
 
 if (failures > 0) { console.error(`\n${failures} data check(s) failed`); process.exit(1); }
-console.log(`Data checks passed: ${routes.map(r => r.id).join(", ")}; ${pendingDayGroups.length} pending group(s)`);
+console.log(`Data checks passed: ${routes.map(r => r.id).join(", ")}`);

@@ -90,7 +90,7 @@ function todaysDayId(routeId: string): string | null {
 }
 
 export function TripProvider({ children }: { children: ReactNode }) {
-  const defaultRouteId = routes[0]?.id ?? "rockies-utah-grand-canyon-10";
+  const defaultRouteId = routes[0]?.id ?? "wyoming-i80-main";
   const [selectedRouteId, setSelectedRouteId] = useState<string>(() => {
     const stored = loadJSON<string>("route", defaultRouteId);
     return routes.some(r => r.id === stored) ? stored : defaultRouteId;
