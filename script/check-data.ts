@@ -39,14 +39,13 @@ function checkDay(day: Day) {
   }
 }
 
-function checkRoute(route: Route, deep: boolean) {
+function checkRoute(route: Route) {
   const seq: Day[] = [];
   for (const id of route.dayIds) {
     const d = dayById.get(id);
     if (!d) { fail(`${route.id}: unknown day "${id}"`); continue; }
     seq.push(d);
   }
-  if (!deep) return;
   for (const d of seq) {
     checkDay(d);
     if (!hotels.some(h => h.city === d.hotelCity)) fail(`${route.id}/${d.id}: no hotels entry for "${d.hotelCity}"`);
@@ -66,10 +65,23 @@ function checkRoute(route: Route, deep: boolean) {
     fail(`${route.id}: totalMiles ${route.totalMiles} !== day sum ${sumMiles}`);
   }
   if (route.totalDays !== seq.length) fail(`${route.id}: totalDays ${route.totalDays} !== ${seq.length} days`);
-  for (const bid of route.bonusStopIds ?? []) if (!stopById.has(bid)) fail(`${route.id}: unknown bonus stop "${bid}"`);
+  for (const bid of route.bonusStopIds ?? []) {
+    const s = stopById.get(bid);
+    if (!s) { fail(`${route.id}: unknown bonus stop "${bid}"`); continue; }
+    if (!s.optional) fail(`${route.id}: bonus stop "${bid}" is not marked optional`);
+  }
 }
 
-for (const r of routes) checkRoute(r, true);
+for (const r of routes) checkRoute(r);
+
+// Optional (bonus/detour) stops are off-polyline map extras — they should
+// never also be listed as a core stop on any day's drive.
+for (const d of allDays) {
+  for (const id of d.stopIds) {
+    const s = stopById.get(id);
+    if (s?.optional) fail(`${d.id}: optional stop "${id}" appears in day stopIds`);
+  }
+}
 
 // Fork-model shape: both routes share the trunk (nights 1-5) and the final day.
 const wy = routes.find(r => r.id === "wyoming-i80-main");
