@@ -26,7 +26,7 @@ export default function Home() {
           <div className="min-w-0 leading-tight">
             <div className="truncate font-serif text-base font-semibold sm:text-lg">Pathfinder</div>
             <div className="hidden max-w-[48vw] truncate text-[13px] uppercase tracking-[0.12em] text-muted-foreground sm:block lg:max-w-none">
-              July 22-31 · North Branford, CT to Del Mar, CA · {selectedRoute.name}
+              July 22-30 · North Branford, CT to Del Mar, CA · {selectedRoute.name}
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ function Legend() {
         <LegendRow color="hsl(var(--accent))" label="Today’s drive" line />
         <LegendRow color="hsl(var(--foreground))" label="Full route ahead" line dashed />
         <LegendRow color="hsl(8 38% 36%)" label="Overnight" />
-        <LegendRow color="hsl(200 40% 38%)" label="Comparison route" line dashed />
+        <LegendRow color="hsl(200 40% 38%)" label="Other branch" line dashed />
       </div>
     </div>
   );

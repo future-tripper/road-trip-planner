@@ -55,6 +55,32 @@ export function TripMap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoute]);
 
+  // Off-polyline optional detours for the selected route — rendered as markers
+  // only (never added to a line) using the muted dashed "alt" pin so they read
+  // as bonus stops at a glance.
+  const bonusStops = useMemo(() => {
+    const ids = selectedRoute.bonusStopIds ?? [];
+    return ids.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoute]);
+
+  // The other route's branch-only days (trunk + final day are shared, so diffing
+  // out the selected route's day ids leaves just the diverging leg) — drawn as a
+  // dashed comparison line so the map shows what the fork gives up either way.
+  const otherBranchStops = useMemo(() => {
+    const otherRoute = routes.find(r => r.id !== selectedRoute.id);
+    if (!otherRoute) return [] as Stop[];
+    const branchOnlyDayIds = otherRoute.dayIds.filter(id => !selectedRoute.dayIds.includes(id));
+    const otherDays = branchOnlyDayIds
+      .map(id => allDays.find(d => d.id === id))
+      .filter((d): d is Day => !!d);
+    const orderedIds: string[] = [];
+    const seen = new Set<string>();
+    otherDays.forEach(d => d.stopIds.forEach(id => { if (!seen.has(id)) { seen.add(id); orderedIds.push(id); } }));
+    return orderedIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoute]);
+
   // Keep the latest route stops / active day reachable from the mount-only effect.
   const selectedStopsRef = useRef(selectedStops);
   selectedStopsRef.current = selectedStops;
@@ -157,6 +183,24 @@ export function TripMap() {
       }
     }
 
+    // other-branch comparison line — the fixed blue from the legend swatch, not
+    // routeColor(), so it stays visually distinct from "today's drive" no matter
+    // which route is selected. clearLayers() (not .remove()) so the old polyline
+    // is actually dropped from altLayerRef's internal registry, not just detached
+    // from the map — otherwise it accumulates there across effect re-runs.
+    altLayerRef.current?.clearLayers();
+    if (otherBranchStops.length > 1 && altLayerRef.current) {
+      altLineRef.current = L.polyline(otherBranchStops.map(s => [s.lat, s.lng]), {
+        color: "hsl(200 40% 38%)",
+        opacity: 0.6,
+        weight: 3,
+        dashArray: "4 8",
+        lineCap: "round",
+      }).addTo(altLayerRef.current);
+    } else {
+      altLineRef.current = null;
+    }
+
     // markers
     const dayStopIds = new Set<string>();
     if (activeDayId) {
@@ -199,6 +243,44 @@ export function TripMap() {
       marker.addTo(layer);
       markersRef.current.set(s.id, marker);
     });
+
+    // bonus/optional detour markers — off-polyline extras for this route.
+    // Default to the muted dashed "alt" pin so they read as optional at a
+    // glance; still promote to "active"/"saved" so selecting or saving one
+    // gives the same feedback as any other marker. Never added to a line.
+    bonusStops.forEach((s) => {
+      const isSaved = saved.has(s.id);
+      const isActive = activeStopId === s.id || selectedPlaceId === s.id;
+      const kind: "default" | "active" | "saved" | "overnight" | "alt" =
+        isActive ? "active" : isSaved ? "saved" : "alt";
+
+      const marker = L.marker([s.lat, s.lng], {
+        icon: pinIcon(kind),
+        title: s.name,
+        keyboard: true,
+        riseOnHover: true,
+      });
+
+      const popup = `
+        <div style="min-width:200px">
+          <div style="font-family:var(--font-serif);font-weight:600;font-size:14px;margin-bottom:4px">${s.name}</div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:hsl(var(--muted-foreground));margin-bottom:6px">${s.region} · optional detour</div>
+          <p style="margin:0 0 8px 0;color:hsl(var(--foreground))">${s.blurb}</p>
+          <button data-stop-toggle="${s.id}" style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid hsl(var(--border));background:${isSaved ? "hsl(var(--accent))" : "hsl(var(--card))"};color:${isSaved ? "hsl(var(--accent-foreground))" : "hsl(var(--foreground))"};cursor:pointer">
+            ${isSaved ? "✓ In your plan" : "+ Add to plan"}
+          </button>
+        </div>`;
+      marker.bindPopup(popup, { closeButton: true, offset: [0, -2] });
+      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id); });
+      marker.on("popupopen", (e) => {
+        const el = (e.popup.getElement() as HTMLElement | null);
+        if (!el) return;
+        const btn = el.querySelector(`[data-stop-toggle="${s.id}"]`);
+        btn?.addEventListener("click", () => { toggleSaved(s.id); marker.closePopup(); });
+      });
+      marker.addTo(layer);
+      markersRef.current.set(s.id, marker);
+    });
     // Re-open the selected place's popup. Rebuilding the layer above closes any
     // open popup, so without this a marker click (which selects the place and
     // triggers this re-run) would flash its popup shut. Idempotent on re-runs.
@@ -207,7 +289,7 @@ export function TripMap() {
     // NOTE: no fitBounds here — this effect re-runs when selectedStops / the day
     // changes; refitting would fight the day-pan and zoom the map back out.
     // Framing is owned by the initial-fit observer and the day-pan effect.
-  }, [selectedStops, selectedRoute, activeDayId, activeStopId, selectedPlaceId, saved, setActiveStopId, setSelectedPlaceId, toggleSaved]);
+  }, [selectedStops, bonusStops, otherBranchStops, selectedRoute, activeDayId, activeStopId, selectedPlaceId, saved, setActiveStopId, setSelectedPlaceId, toggleSaved]);
 
   // pan to active day
   useEffect(() => {
