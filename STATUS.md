@@ -1,15 +1,16 @@
 # Project Status — Pathfinder Road Trip Planner
 
-**Updated:** 2026-07-19
+**Updated:** 2026-07-20
 
 Family road-trip planner web app for a Connecticut → Del Mar, CA drive (July 22–30, 2026) with a ~3.5-year-old and a dog. Live PWA at https://future-tripper.github.io/road-trip-planner/ — GitHub Pages, auto-deploys on push to `main`.
 
 ## Completed (recent work)
 
-- **I-80 reroute — one plan with a fork, not two competing routes.** New weather guidance (heat, fire, and precipitation outlooks for late July 2026) argued against both of the old routes: the Colorado West Slope/Glenwood Canyon corridor carries wildfire-smoke-flood risk, and a Route 66/I-40 option runs through above-normal Southwest fire zones with more time in Southern Plains heat. The trip doesn't need to pick a western routing until the evening of **July 26 in Kearney, NE** — everything before that is shared. The app now models that as a single trip with a 5-night shared trunk (North Branford → State College → Cleveland → Chicago → Des Moines → Kearney), a decision point in Kearney, two western branches (`wyoming-i80-main`, terra, the weather-first default: Laramie → Park City → Cedar City; `colorado-i70-backup`, blue, the scenic backup taken only if conditions are ordinary: Golden → Glenwood Springs → Cedar City), and a shared final desert day into Del Mar on Jul 30. The two prior routes (northern Rockies+Utah+Grand Canyon and Historic Route 66) are removed from the data.
+- **Chesterton swap — the Chicago night is gone.** Night 3 of the shared trunk is now Chesterton, IN (Indiana Dunes) instead of Chicago: it removes a Saturday-morning Loop/roof-box-parking problem and puts the family at the Dunes' doorstep instead. Trunk day 3 (Cleveland → Chesterton, 315 mi) adds a Merry-Go-Round Museum stop in Sandusky as a core A/C break; trunk day 4 (Chesterton → Des Moines, 378 mi) bypasses Chicago on I-80/I-294 and adds Amana Colonies as the new lunch stop (Iowa 80 truck stop keeps its dog park but loses the lunch flag). Cloud Gate, Maggie Daley Park, and the Leaning Tower of Niles are still on the map as optional/bonus detour markers, not core stops. Marblehead Lighthouse (OH) is a new optional detour paired with a Lake Point Motel, Marblehead waterfront option added to the Cleveland booking guide. The Des Moines booking guide now re-leads with Wildwood Lodge (no weight-limit ambiguity); Surety Hotel is the alternate. Service worker `VERSION` bumped `v2` → `v3`.
+- **I-80 reroute — one plan with a fork, not two competing routes.** New weather guidance (heat, fire, and precipitation outlooks for late July 2026) argued against both of the old routes: the Colorado West Slope/Glenwood Canyon corridor carries wildfire-smoke-flood risk, and a Route 66/I-40 option runs through above-normal Southwest fire zones with more time in Southern Plains heat. The trip doesn't need to pick a western routing until the evening of **July 26 in Kearney, NE** — everything before that is shared. The app now models that as a single trip with a 5-night shared trunk (North Branford → State College → Cleveland → Chesterton (Indiana Dunes) → Des Moines → Kearney), a decision point in Kearney, two western branches (`wyoming-i80-main`, terra, the weather-first default: Laramie → Park City → Cedar City; `colorado-i70-backup`, blue, the scenic backup taken only if conditions are ordinary: Golden → Glenwood Springs → Cedar City), and a shared final desert day into Del Mar on Jul 30. The two prior routes (northern Rockies+Utah+Grand Canyon and Historic Route 66) are removed from the data.
 - **Kearney decision card** — a dedicated card on the Live tab (`KearneyDecisionCard` in `client/src/components/Planner.tsx`) surfaces the Jul 26 go/no-go with the threshold conditions for taking Colorado (I-70 fully open, acceptable AQI, no Moderate/High excessive-rainfall outlook over western Colorado) versus defaulting to Wyoming.
 - **Data-integrity gate** — `script/check-data.ts`, run via `npm run check:data`, validates the trip data (day/stop cross-references, one-lunch-per-day rule with a documented exception set, distance sanity checks) against `client/src/data/julyTrip.ts`. This is a new local gate; it is not yet wired into CI.
-- **67 verified stops across 11 hotel cities** in the rebuilt itinerary, replacing the old two-route stop set.
+- **70 verified stops across 9 overnight cities** (plus branch-city hotel entries) in the rebuilt itinerary, replacing the old two-route stop set.
 - **Copy pass for the single-plan model** (this task): the route picker's section label changed from "Route" to "Trip plan" (`Planner.tsx`), the map legend's "Comparison route" swatch is now labeled "Other branch" (`client/src/pages/Home.tsx`), the header date range is "July 22-30" (was "22-31"), the `index.html` meta description now describes the I-80/Wyoming-main/Colorado-backup framing instead of the old "northern route," and the service worker `VERSION` bumped `v1` → `v2` to force clients to pick up the new caches.
 - Prior work (still in place, unchanged by the reroute): arrival-date weather on the Live tab and Drive card (`client/src/lib/conditions.ts`, `client/src/lib/forecast.ts`); fire/flood/tornado safety banner + full-route hazard board (`client/src/lib/safety.ts`, `SafetyBanner`/`ConditionsPane`/`Tabs` in `Planner.tsx`); mobile map/route-picker usability fixes.
 
@@ -23,7 +24,7 @@ Family road-trip planner web app for a Connecticut → Del Mar, CA drive (July 2
 
 ## Current Work
 
-- None in flight. The I-80 reroute (routes, data, decision card, copy pass, data-integrity script) is merged to `main` and deployed.
+- None in flight. The I-80 reroute (routes, data, decision card, copy pass, data-integrity script) is merged to `main` and deployed. The Chesterton swap is on branch `chesterton-swap`, not yet merged.
 
 ## Blockers and Open Questions
 
@@ -48,7 +49,7 @@ Family road-trip planner web app for a Connecticut → Del Mar, CA drive (July 2
 - Typecheck / build: `npx tsc --noEmit` / `npx vite build` (output `dist/public`).
 - Data integrity: `npm run check:data`.
 - Deploy: push to `main` → the Actions workflow builds and publishes to Pages (~40s).
-- Bump the `VERSION` constant in `client/public/sw.js` when service-worker caching behavior changes (currently `v2`).
+- Bump the `VERSION` constant in `client/public/sw.js` when service-worker caching behavior changes (currently `v3`).
 
 ## Next Action
 
