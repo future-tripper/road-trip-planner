@@ -1378,13 +1378,14 @@ function KearneyDecisionCard() {
   return (
     <div className="border-b border-border bg-card p-3" data-testid="kearney-decision-card">
       <div className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.12em] text-muted-foreground">
-        <Signpost className="h-3.5 w-3.5" /> The Kearney decision — evening of Jul 26
+        <Signpost className="h-3.5 w-3.5" /> Pick your route — Sunday night in Kearney (Jul 26)
       </div>
       <p className="mt-1.5 text-xs text-foreground/90">
-        Both branches share the first five nights. In Kearney, pick:
-        <strong> Wyoming (default)</strong> unless Colorado is clearly ordinary —
-        I-70 fully open, acceptable air quality, and no Moderate/High
-        excessive-rainfall outlook over western Colorado.
+        Both routes share the same first five nights. Tonight in Kearney, you
+        choose tomorrow's road. <strong>Go with Wyoming unless Colorado's
+        weather looks calm and safe</strong> — I-70 open, the air clear of
+        wildfire smoke, and no flood or heavy-rain warnings in the western
+        Colorado mountains. If you're unsure, take Wyoming.
       </p>
       <button
         type="button"
@@ -1393,22 +1394,22 @@ function KearneyDecisionCard() {
         data-testid="button-decision-thresholds"
         className="mt-2 inline-flex items-center gap-1 text-[13px] text-primary hover:underline"
       >
-        {open ? "Hide" : "Show"} reroute/delay thresholds
+        {open ? "Hide" : "Show"} when to actually change plans
         <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-foreground/90">
-          <li>Don't reroute over a "Marginal" or "Slight" label on a big regional map.</li>
-          <li>Do change or delay for: an active road closure, evacuation order, or fire incident on the highway.</li>
-          <li>A WPC Moderate or High excessive-rainfall risk over a mountain or canyon segment.</li>
-          <li>An active tornado warning, or an organized severe-weather watch covering hours of the route.</li>
-          <li>Smoke pushing air quality to unhealthy around planned outdoor stops.</li>
-          <li>A heat warning combined with unreliable vehicle A/C.</li>
+          <li>A weather map showing "Marginal" or "Slight" risk is normal summer stuff — don't change plans over that alone.</li>
+          <li>Do change or wait for: a highway actually closed, an evacuation order, or a fire on your road.</li>
+          <li>A "Moderate" or "High" flood or heavy-rain warning over a mountain or canyon stretch (the serious levels, not the low ones).</li>
+          <li>A tornado warning, or a severe-storm watch covering a big part of the day's drive.</li>
+          <li>Wildfire smoke making the air unhealthy where you'd be stopping outside.</li>
+          <li>An extreme-heat warning for the day — especially if the car's A/C is acting up.</li>
         </ul>
       )}
       <p className="mt-2 text-xs text-muted-foreground">
-        Check the hazards board below for both branches before deciding — switch the
-        trip plan above to compare Wyoming vs Colorado look-aheads.
+        Before you decide, check the hazards board below for both routes — flip
+        the trip-plan switch above to compare the weather on Wyoming and Colorado.
       </p>
     </div>
   );
