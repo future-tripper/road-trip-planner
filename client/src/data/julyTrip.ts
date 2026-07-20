@@ -1985,7 +1985,7 @@ export const bookingGuides: BookingGuide[] = [
   },
   {
     city: "Kearney",
-    headline: "Fork-decision night — no unique dog-friendly stay verifies here, so lean on a pool and a firm weight-limit number instead.",
+    headline: "Decision night — no unique dog-friendly stay verifies here, so lean on a pool and a firm weight-limit number instead.",
     hotelStrategy: "Kearney’s inventory is standard highway chains — no boutique or characterful dog-friendly option verifies here, so chains are the honest play tonight. Prioritize a pool for the July heat and get the pet weight limit in writing before booking, since both realistic options cap it. Best Western Plus Mid-Nebraska Inn & Suites has an indoor pool and hot tub and sits right off 2nd Ave near the I-80 exits, matching the day’s own routing note.",
     hotelTargets: [
       { name: "Best Western Plus Mid-Nebraska Inn & Suites", note: "Indoor pool and hot tub, right off 2nd Ave near the I-80 exits; up to 2 dogs, 80-lb weight limit, $25/day pet rate ($150/week max) reported.", source: source("BringFido — Best Western Plus Mid Nebraska Inn & Suites", "https://www.bringfido.com/lodging/85149") },
@@ -1995,7 +1995,7 @@ export const bookingGuides: BookingGuide[] = [
       { name: "Cunningham’s Journal on the Bricks", note: "Downtown gastropub in an 1890 building with a dog-friendly courtyard patio; a few blocks from the 2nd Ave hotel cluster.", source: source("BringFido — Cunningham’s Journal on the Bricks", "https://www.bringfido.com/restaurant/86355") },
     ],
     logistics: [
-      { name: "Fork-decision dinner", note: "Check the Live tab’s road conditions before locking in Wyoming vs. Colorado over dinner tonight.", source: source("Visit Kearney Nebraska", "https://visitkearney.org/") },
+      { name: "Route-decision dinner", note: "Check the Live tab’s road conditions before locking in Wyoming vs. Colorado over dinner tonight.", source: source("Visit Kearney Nebraska", "https://visitkearney.org/") },
     ],
     attractionNotes: [
       { name: "The Archway", note: "The museum bridge that arches over I-80 itself — an air-conditioned hour of pioneer-trail exhibits; dogs wait out the visit, but there’s green space below for a leg stretch.", source: source("The Archway", "https://archway.org/") },

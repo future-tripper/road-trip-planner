@@ -1404,7 +1404,7 @@ function KearneyDecisionCard() {
           <li>A "Moderate" or "High" flood or heavy-rain warning over a mountain or canyon stretch (the serious levels, not the low ones).</li>
           <li>A tornado warning, or a severe-storm watch covering a big part of the day's drive.</li>
           <li>Wildfire smoke making the air unhealthy where you'd be stopping outside.</li>
-          <li>An extreme-heat warning for the day — especially if the car's A/C is acting up.</li>
+          <li>An extreme-heat warning on a day when the car's A/C isn't working reliably (heat alone is normal out there — it's heat plus no A/C that's the problem).</li>
         </ul>
       )}
       <p className="mt-2 text-xs text-muted-foreground">
