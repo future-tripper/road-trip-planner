@@ -15,6 +15,7 @@ Family road-trip planner web app for a Connecticut → Del Mar, CA drive (July 2
 - Prior work (still in place, unchanged by the reroute): arrival-date weather on the Live tab and Drive card (`client/src/lib/conditions.ts`, `client/src/lib/forecast.ts`); fire/flood/tornado safety banner + full-route hazard board (`client/src/lib/safety.ts`, `SafetyBanner`/`ConditionsPane`/`Tabs` in `Planner.tsx`); mobile map/route-picker usability fixes.
 
 ## Decisions
+- **Night-3 hotel confirmed: Hilton Garden Inn Chesterton.** A second-zone sweep (Valparaiso, New Buffalo MI) found no option clearing the family's bar — best near-miss (Neighborhood Hotel New Buffalo) failed on distance, single dog room, and no pool. Guide keeps the call-ahead protocol (pet fee + pool status). Note: Dunes area is Central time; New Buffalo is Eastern.
 
 - **Single plan, one fork, not two independent routes.** `routes` in `julyTrip.ts` still holds two `Route` entries (so the existing route-switcher/map-legend UI keeps working), but they now share the same trunk days and only diverge for the Jul 27–29 western leg — the data and copy both describe this as "one plan with a branch," not "pick a route at the start."
 - **Fully static, no backend.** Weather / alerts / AQI are fetched client-side, so it hosts free on GitHub Pages and works offline (PWA). The Express server in `server/` is a dev-only leftover, not deployed.
