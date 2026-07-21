@@ -88,6 +88,9 @@ export function TripMap() {
   activeDayIdRef.current = activeDayId;
   const didFitRef = useRef(false);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  // The selection the marker effect last acted on — popups only auto-open when
+  // the selection actually changes, not on every unrelated marker rebuild.
+  const prevSelIdRef = useRef<string | null>(null);
 
   // mount
   useEffect(() => {
@@ -153,6 +156,11 @@ export function TripMap() {
   useEffect(() => {
     const map = mapRef.current; const layer = layerRef.current;
     if (!map || !layer) return;
+    // Which popup is open right now, before the rebuild tears everything down —
+    // so a rebuild caused by unrelated state (saving a stop from the planner)
+    // preserves it, while a popup the user explicitly closed stays closed.
+    let openPopupId: string | null = null;
+    markersRef.current.forEach((m, id) => { if (m.isPopupOpen()) openPopupId = id; });
     layer.clearLayers();
     markersRef.current.clear();
 
@@ -233,12 +241,14 @@ export function TripMap() {
           </button>
         </div>`;
       marker.bindPopup(popup, { closeButton: true, offset: [0, -2] });
-      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id); });
+      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id, "map"); });
       marker.on("popupopen", (e) => {
         const el = (e.popup.getElement() as HTMLElement | null);
         if (!el) return;
-        const btn = el.querySelector(`[data-stop-toggle="${s.id}"]`);
-        btn?.addEventListener("click", () => { toggleSaved(s.id); marker.closePopup(); });
+        const btn = el.querySelector<HTMLButtonElement>(`[data-stop-toggle="${s.id}"]`);
+        // Assign (don't addEventListener): reopening the same popup re-fires this
+        // handler, and stacked listeners made the toggle fire twice — a no-op.
+        if (btn) btn.onclick = () => { toggleSaved(s.id); marker.closePopup(); };
       });
       marker.addTo(layer);
       markersRef.current.set(s.id, marker);
@@ -271,21 +281,27 @@ export function TripMap() {
           </button>
         </div>`;
       marker.bindPopup(popup, { closeButton: true, offset: [0, -2] });
-      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id); });
+      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id, "map"); });
       marker.on("popupopen", (e) => {
         const el = (e.popup.getElement() as HTMLElement | null);
         if (!el) return;
-        const btn = el.querySelector(`[data-stop-toggle="${s.id}"]`);
-        btn?.addEventListener("click", () => { toggleSaved(s.id); marker.closePopup(); });
+        const btn = el.querySelector<HTMLButtonElement>(`[data-stop-toggle="${s.id}"]`);
+        // Assign (don't addEventListener) — see the main-marker handler above.
+        if (btn) btn.onclick = () => { toggleSaved(s.id); marker.closePopup(); };
       });
       marker.addTo(layer);
       markersRef.current.set(s.id, marker);
     });
-    // Re-open the selected place's popup. Rebuilding the layer above closes any
-    // open popup, so without this a marker click (which selects the place and
-    // triggers this re-run) would flash its popup shut. Idempotent on re-runs.
+    // Re-open a popup only when (a) the selection just changed — a fresh click
+    // should show its popup even though the rebuild closed it — or (b) that
+    // popup was open before this rebuild (an unrelated state change shouldn't
+    // flash it shut). A popup the user closed with X stays closed: unrelated
+    // rebuilds no longer resurrect it.
     const selId = selectedPlaceId ?? activeStopId;
-    if (selId) markersRef.current.get(selId)?.openPopup();
+    if (selId && (selId !== prevSelIdRef.current || openPopupId === selId)) {
+      markersRef.current.get(selId)?.openPopup();
+    }
+    prevSelIdRef.current = selId;
     // NOTE: no fitBounds here — this effect re-runs when selectedStops / the day
     // changes; refitting would fight the day-pan and zoom the map back out.
     // Framing is owned by the initial-fit observer and the day-pan effect.
@@ -299,6 +315,12 @@ export function TripMap() {
     // and lands at the wrong zoom; the observer owns the first frame.
     if (!didFitRef.current) return;
     const day = allDays.find(d => d.id === activeDayId); if (!day || day.stopIds.length === 0) return;
+    // When the day changed because the user selected a stop IN that day (the
+    // planner syncs activeDayId to the selection), the stop-pan effect owns the
+    // camera — flying to day bounds here cancelled that flyTo and yanked the
+    // map away from the very stop the user just clicked.
+    const selId = selectedPlaceId ?? activeStopId;
+    if (selId && day.stopIds.includes(selId)) return;
     const pts = day.stopIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
     if (pts.length === 0) return;
     if (pts.length === 1) {
