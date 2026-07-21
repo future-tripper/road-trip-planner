@@ -10,7 +10,7 @@
  * and checklists (localStorage) work fully offline.
  */
 
-const VERSION = "v4";
+const VERSION = "v5";
 const APP_CACHE = `pathfinder-app-${VERSION}`;
 const TILE_CACHE = `pathfinder-tiles-${VERSION}`;
 const RUNTIME_CACHE = `pathfinder-runtime-${VERSION}`;
