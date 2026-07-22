@@ -18,7 +18,10 @@ const PICK_GLYPHS: Record<PickRole, string> = {
 };
 
 // Use a simple SVG inside a Leaflet DivIcon — avoids the broken-default-marker problem.
-function pinIcon(kind: "default" | "active" | "saved" | "overnight" | "alt" | "pick", num?: number, pickRole?: PickRole) {
+// savedRing: saved stops whose pin shows a higher-priority style (selected
+// orange, pick green) still get a gold ring — saving from a popup previously
+// gave no visible map feedback because those styles outranked the gold pin.
+function pinIcon(kind: "default" | "active" | "saved" | "overnight" | "alt" | "pick", num?: number, pickRole?: PickRole, savedRing?: boolean) {
   const inner = pickRole != null
     ? `<div>${PICK_GLYPHS[pickRole]}</div>`
     : num != null
@@ -30,7 +33,7 @@ function pinIcon(kind: "default" | "active" | "saved" | "overnight" | "alt" | "p
         </svg>
       )}</div>`;
   return L.divIcon({
-    className: `pin-marker pin-${kind}`,
+    className: `pin-marker pin-${kind}${savedRing && kind !== "saved" ? " pin-saved-ring" : ""}`,
     html: inner,
     iconSize: [28, 28],
     iconAnchor: [14, 28],
@@ -274,7 +277,7 @@ export function TripMap() {
       const marker = L.marker([s.lat, s.lng], {
         // Pick glyph wins over the day-order number (and survives selection);
         // other day stops keep their numbered pins.
-        icon: pinIcon(kind, inDay && !pickRole ? (activeDay?.stopIds.indexOf(s.id) ?? -1) + 1 : undefined, pickRole),
+        icon: pinIcon(kind, inDay && !pickRole ? (activeDay?.stopIds.indexOf(s.id) ?? -1) + 1 : undefined, pickRole, isSaved),
         title: s.name,
         keyboard: true,
         riseOnHover: true,
@@ -306,7 +309,7 @@ export function TripMap() {
         isActive ? "active" : isSaved ? "saved" : "alt";
 
       const marker = L.marker([s.lat, s.lng], {
-        icon: pinIcon(kind),
+        icon: pinIcon(kind, undefined, undefined, isSaved),
         title: s.name,
         keyboard: true,
         riseOnHover: true,

@@ -254,7 +254,7 @@ function relatedStops(selected: Stop, route: Route, limit = 6): { stop: Stop; re
 // Deliberately small: it never dominates vertical space. Rich per-place context
 // now lives inside each tab (Drive/Itinerary/All stops/Book/Plan).
 function SelectedPlaceBar({ tab, setTab }: { tab: PlannerTab; setTab: (t: PlannerTab) => void }) {
-  const { selectedPlaceId, setSelectedPlaceId, selectedRouteId, setMobileView } = useTrip();
+  const { selectedPlaceId, setSelectedPlaceId, selectedRouteId, setMobileView, setActiveStopId } = useTrip();
   if (!selectedPlaceId) return null;
   const stop = stops.find(s => s.id === selectedPlaceId);
   if (!stop) return null;
@@ -319,9 +319,11 @@ function SelectedPlaceBar({ tab, setTab }: { tab: PlannerTab; setTab: (t: Planne
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
+          {/* Clear BOTH selection slots — leaving activeStopId set kept the
+              map pin orange ("selected") after the user dismissed the place. */}
           <button
             type="button"
-            onClick={() => setSelectedPlaceId(null)}
+            onClick={() => { setSelectedPlaceId(null); setActiveStopId(null); }}
             data-testid="button-clear-selected-place"
             aria-label="Clear selected place"
             className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-background hover-elevate"
@@ -1113,7 +1115,7 @@ function DayChecklist({ dayId }: { dayId: string }) {
 }
 
 function StopsPane() {
-  const { filters, selectedRouteId, selectedPlaceId, setSelectedPlaceId, selectionOrigin } = useTrip();
+  const { filters, selectedRouteId, selectedPlaceId, setSelectedPlaceId, selectionOrigin, setActiveStopId } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const routeIds = routeDays(selectedRoute).flatMap(d => d.stopIds);
   // Bonus/optional detours aren't on any day's stopIds (they're off-polyline
@@ -1151,7 +1153,7 @@ function StopsPane() {
           <span>Options near <strong>{selectedStop.name}</strong></span>
           <button
             type="button"
-            onClick={() => { setBrowsing(true); setSelectedPlaceId(null); }}
+            onClick={() => { setBrowsing(true); setSelectedPlaceId(null); setActiveStopId(null); }}
             data-testid="button-stops-browse-all"
             className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[13px] hover-elevate"
           >
