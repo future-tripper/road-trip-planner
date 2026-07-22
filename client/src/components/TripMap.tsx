@@ -3,11 +3,25 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useTrip } from "@/lib/state";
 import { allDays, routes, stops, type Day, type Stop } from "@/data/julyTrip";
+import { drivePicksForDay, PICK_LABELS, type PickRole } from "@/lib/drivePicks";
 import { renderToStaticMarkup } from "react-dom/server";
+import { Baby, Dog, Sparkles, UtensilsCrossed } from "lucide-react";
+
+// Role glyphs for the day's Drive-tab picks — rendered inside their pins so
+// "today's lunch / kid / dog / highlight" stops read differently at a glance
+// from ordinary stops and the dark-red overnight pins.
+const PICK_GLYPHS: Record<PickRole, string> = {
+  highlight: renderToStaticMarkup(<Sparkles width={13} height={13} strokeWidth={2.4} />),
+  lunch: renderToStaticMarkup(<UtensilsCrossed width={13} height={13} strokeWidth={2.4} />),
+  kid: renderToStaticMarkup(<Baby width={13} height={13} strokeWidth={2.4} />),
+  dog: renderToStaticMarkup(<Dog width={13} height={13} strokeWidth={2.4} />),
+};
 
 // Use a simple SVG inside a Leaflet DivIcon — avoids the broken-default-marker problem.
-function pinIcon(kind: "default" | "active" | "saved" | "overnight" | "alt", num?: number) {
-  const inner = num != null
+function pinIcon(kind: "default" | "active" | "saved" | "overnight" | "alt" | "pick", num?: number, pickRole?: PickRole) {
+  const inner = pickRole != null
+    ? `<div>${PICK_GLYPHS[pickRole]}</div>`
+    : num != null
     ? `<div><span style="font-family:var(--font-sans);font-weight:700;font-size:11px;line-height:1">${num}</span></div>`
     : `<div>${renderToStaticMarkup(
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -22,6 +36,10 @@ function pinIcon(kind: "default" | "active" | "saved" | "overnight" | "alt", num
     iconAnchor: [14, 28],
     popupAnchor: [0, -26],
   });
+}
+
+function googleMapsUrl(s: Stop) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${s.name} ${s.region}`)}`;
 }
 
 export function TripMap() {
@@ -88,6 +106,9 @@ export function TripMap() {
   activeDayIdRef.current = activeDayId;
   const didFitRef = useRef(false);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  // The selection the marker effect last acted on — popups only auto-open when
+  // the selection actually changes, not on every unrelated marker rebuild.
+  const prevSelIdRef = useRef<string | null>(null);
 
   // mount
   useEffect(() => {
@@ -153,6 +174,11 @@ export function TripMap() {
   useEffect(() => {
     const map = mapRef.current; const layer = layerRef.current;
     if (!map || !layer) return;
+    // Which popup is open right now, before the rebuild tears everything down —
+    // so a rebuild caused by unrelated state (saving a stop from the planner)
+    // preserves it, while a popup the user explicitly closed stays closed.
+    let openPopupId: string | null = null;
+    markersRef.current.forEach((m, id) => { if (m.isPopupOpen()) openPopupId = id; });
     layer.clearLayers();
     markersRef.current.clear();
 
@@ -203,42 +229,67 @@ export function TripMap() {
 
     // markers
     const dayStopIds = new Set<string>();
-    if (activeDayId) {
-      const day = allDays.find(d => d.id === activeDayId);
-      day?.stopIds.forEach(id => dayStopIds.add(id));
-    }
+    const activeDay = activeDayId ? allDays.find(d => d.id === activeDayId) : undefined;
+    activeDay?.stopIds.forEach(id => dayStopIds.add(id));
+
+    // Today's Drive-tab picks get their own pin style + glyph so they stand
+    // apart from ordinary stops and the overnight (hotel) pins.
+    const picks = drivePicksForDay(activeDay);
+    const pickRoleByStopId = new Map<string, PickRole>();
+    (Object.keys(PICK_LABELS) as PickRole[]).forEach(role => {
+      const st = picks[role];
+      if (st) pickRoleByStopId.set(st.id, role);
+    });
+
+    // Every popup links out to the stop's own info page and to Google Maps.
+    const linkStyle = "font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid hsl(var(--border));background:hsl(var(--card));color:hsl(var(--primary));text-decoration:none";
+    const popupHtml = (s: Stop, opts: { isSaved: boolean; roleLabel?: string; optionalNote?: boolean }) => {
+      const info = s.website ?? s.sources[0]?.url;
+      const meta = [s.region, opts.optionalNote ? "optional detour" : null, opts.roleLabel ?? null]
+        .filter(Boolean).join(" · ");
+      return `
+        <div style="min-width:210px">
+          <div style="font-family:var(--font-serif);font-weight:600;font-size:14px;margin-bottom:4px">${s.name}</div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:hsl(var(--muted-foreground));margin-bottom:6px">${meta}</div>
+          <p style="margin:0 0 8px 0;color:hsl(var(--foreground))">${s.blurb}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+            <button data-stop-toggle="${s.id}" style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid hsl(var(--border));background:${opts.isSaved ? "hsl(var(--accent))" : "hsl(var(--card))"};color:${opts.isSaved ? "hsl(var(--accent-foreground))" : "hsl(var(--foreground))"};cursor:pointer">
+              ${opts.isSaved ? "✓ In your plan" : "+ Add to plan"}
+            </button>
+            ${info ? `<a href="${info}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">Info ↗</a>` : ""}
+            <a href="${googleMapsUrl(s)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">Google Maps ↗</a>
+          </div>
+        </div>`;
+    };
 
     selectedStops.forEach((s) => {
       const isOvernight = s.kind === "overnight";
       const isSaved = saved.has(s.id);
       const isActive = activeStopId === s.id || selectedPlaceId === s.id;
       const inDay = dayStopIds.has(s.id);
-      const kind: "default" | "active" | "saved" | "overnight" =
-        isActive ? "active" : isSaved ? "saved" : isOvernight ? "overnight" : "default";
+      const pickRole = pickRoleByStopId.get(s.id);
+      const kind: "default" | "active" | "saved" | "overnight" | "pick" =
+        isActive ? "active" : pickRole ? "pick" : isSaved ? "saved" : isOvernight ? "overnight" : "default";
 
       const marker = L.marker([s.lat, s.lng], {
-        icon: pinIcon(kind, inDay ? (allDays.find(d => d.id === activeDayId)?.stopIds.indexOf(s.id)! + 1) : undefined),
+        // Pick glyph wins over the day-order number (and survives selection);
+        // other day stops keep their numbered pins.
+        icon: pinIcon(kind, inDay && !pickRole ? (activeDay?.stopIds.indexOf(s.id) ?? -1) + 1 : undefined, pickRole),
         title: s.name,
         keyboard: true,
         riseOnHover: true,
       });
 
-      const popup = `
-        <div style="min-width:200px">
-          <div style="font-family:var(--font-serif);font-weight:600;font-size:14px;margin-bottom:4px">${s.name}</div>
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:hsl(var(--muted-foreground));margin-bottom:6px">${s.region}</div>
-          <p style="margin:0 0 8px 0;color:hsl(var(--foreground))">${s.blurb}</p>
-          <button data-stop-toggle="${s.id}" style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid hsl(var(--border));background:${isSaved ? "hsl(var(--accent))" : "hsl(var(--card))"};color:${isSaved ? "hsl(var(--accent-foreground))" : "hsl(var(--foreground))"};cursor:pointer">
-            ${isSaved ? "✓ In your plan" : "+ Add to plan"}
-          </button>
-        </div>`;
+      const popup = popupHtml(s, { isSaved, roleLabel: pickRole ? PICK_LABELS[pickRole] : undefined });
       marker.bindPopup(popup, { closeButton: true, offset: [0, -2] });
-      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id); });
+      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id, "map"); });
       marker.on("popupopen", (e) => {
         const el = (e.popup.getElement() as HTMLElement | null);
         if (!el) return;
-        const btn = el.querySelector(`[data-stop-toggle="${s.id}"]`);
-        btn?.addEventListener("click", () => { toggleSaved(s.id); marker.closePopup(); });
+        const btn = el.querySelector<HTMLButtonElement>(`[data-stop-toggle="${s.id}"]`);
+        // Assign (don't addEventListener): reopening the same popup re-fires this
+        // handler, and stacked listeners made the toggle fire twice — a no-op.
+        if (btn) btn.onclick = () => { toggleSaved(s.id); marker.closePopup(); };
       });
       marker.addTo(layer);
       markersRef.current.set(s.id, marker);
@@ -261,31 +312,29 @@ export function TripMap() {
         riseOnHover: true,
       });
 
-      const popup = `
-        <div style="min-width:200px">
-          <div style="font-family:var(--font-serif);font-weight:600;font-size:14px;margin-bottom:4px">${s.name}</div>
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:hsl(var(--muted-foreground));margin-bottom:6px">${s.region} · optional detour</div>
-          <p style="margin:0 0 8px 0;color:hsl(var(--foreground))">${s.blurb}</p>
-          <button data-stop-toggle="${s.id}" style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid hsl(var(--border));background:${isSaved ? "hsl(var(--accent))" : "hsl(var(--card))"};color:${isSaved ? "hsl(var(--accent-foreground))" : "hsl(var(--foreground))"};cursor:pointer">
-            ${isSaved ? "✓ In your plan" : "+ Add to plan"}
-          </button>
-        </div>`;
+      const popup = popupHtml(s, { isSaved, optionalNote: true });
       marker.bindPopup(popup, { closeButton: true, offset: [0, -2] });
-      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id); });
+      marker.on("click", () => { setActiveStopId(s.id); setSelectedPlaceId(s.id, "map"); });
       marker.on("popupopen", (e) => {
         const el = (e.popup.getElement() as HTMLElement | null);
         if (!el) return;
-        const btn = el.querySelector(`[data-stop-toggle="${s.id}"]`);
-        btn?.addEventListener("click", () => { toggleSaved(s.id); marker.closePopup(); });
+        const btn = el.querySelector<HTMLButtonElement>(`[data-stop-toggle="${s.id}"]`);
+        // Assign (don't addEventListener) — see the main-marker handler above.
+        if (btn) btn.onclick = () => { toggleSaved(s.id); marker.closePopup(); };
       });
       marker.addTo(layer);
       markersRef.current.set(s.id, marker);
     });
-    // Re-open the selected place's popup. Rebuilding the layer above closes any
-    // open popup, so without this a marker click (which selects the place and
-    // triggers this re-run) would flash its popup shut. Idempotent on re-runs.
+    // Re-open a popup only when (a) the selection just changed — a fresh click
+    // should show its popup even though the rebuild closed it — or (b) that
+    // popup was open before this rebuild (an unrelated state change shouldn't
+    // flash it shut). A popup the user closed with X stays closed: unrelated
+    // rebuilds no longer resurrect it.
     const selId = selectedPlaceId ?? activeStopId;
-    if (selId) markersRef.current.get(selId)?.openPopup();
+    if (selId && (selId !== prevSelIdRef.current || openPopupId === selId)) {
+      markersRef.current.get(selId)?.openPopup();
+    }
+    prevSelIdRef.current = selId;
     // NOTE: no fitBounds here — this effect re-runs when selectedStops / the day
     // changes; refitting would fight the day-pan and zoom the map back out.
     // Framing is owned by the initial-fit observer and the day-pan effect.
@@ -299,6 +348,12 @@ export function TripMap() {
     // and lands at the wrong zoom; the observer owns the first frame.
     if (!didFitRef.current) return;
     const day = allDays.find(d => d.id === activeDayId); if (!day || day.stopIds.length === 0) return;
+    // When the day changed because the user selected a stop IN that day (the
+    // planner syncs activeDayId to the selection), the stop-pan effect owns the
+    // camera — flying to day bounds here cancelled that flyTo and yanked the
+    // map away from the very stop the user just clicked.
+    const selId = selectedPlaceId ?? activeStopId;
+    if (selId && day.stopIds.includes(selId)) return;
     const pts = day.stopIds.map(id => stops.find(s => s.id === id)).filter(Boolean) as Stop[];
     if (pts.length === 0) return;
     if (pts.length === 1) {

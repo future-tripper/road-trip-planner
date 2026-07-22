@@ -11,7 +11,10 @@ interface TripState {
   setActiveStopId: (id: string | null) => void;
   // single source of truth for the currently focused place across all tabs
   selectedPlaceId: string | null;
-  setSelectedPlaceId: (id: string | null) => void;
+  // where the current selection came from — panes react differently to a map
+  // pin tap (jump/scroll to it) vs a click on their own card (stay put)
+  selectionOrigin: "map" | "planner" | null;
+  setSelectedPlaceId: (id: string | null, origin?: "map" | "planner") => void;
   // draft itinerary: stop ids the user wants
   saved: Set<string>;
   toggleSaved: (id: string) => void;
@@ -107,7 +110,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     return route?.dayIds?.[0] ?? days[0]?.id ?? null;
   });
   const [activeStopId, setActiveStopId] = useState<string | null>(null);
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<{ id: string | null; origin: "map" | "planner" | null }>({ id: null, origin: null });
   const [saved, setSaved] = useState<Set<string>>(() => {
     const stored = loadJSON<string[] | null>("saved", null);
     if (stored) return new Set(stored.filter(id => stops.some(s => s.id === id)));
@@ -145,7 +148,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const value: TripState = useMemo(() => ({
     activeDayId, setActiveDayId,
     activeStopId, setActiveStopId,
-    selectedPlaceId, setSelectedPlaceId,
+    selectedPlaceId: selection.id,
+    selectionOrigin: selection.origin,
+    setSelectedPlaceId: (id, origin = "planner") => setSelection({ id, origin: id ? origin : null }),
     saved,
     toggleSaved: (id) => setSaved(prev => {
       const n = new Set(prev);
@@ -180,7 +185,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     selectedRouteId, setSelectedRouteId,
     mobileView, setMobileView,
     plannerTab, setPlannerTab,
-  }), [activeDayId, activeStopId, selectedPlaceId, saved, filters, notes, checklist, theme, selectedRouteId, mobileView, plannerTab]);
+  }), [activeDayId, activeStopId, selection, saved, filters, notes, checklist, theme, selectedRouteId, mobileView, plannerTab]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

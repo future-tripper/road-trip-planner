@@ -201,6 +201,13 @@
 }
 .pin-marker.pin-overnight > div { background: hsl(8 38% 36%);    color: hsl(42 36% 96%); }
 .pin-marker.pin-alt > div     { background: hsl(var(--muted));   color: hsl(var(--foreground)); border-style: dashed; }
+/* Today's Drive-tab picks (highlight / lunch / kid / dog) — deep green with a
+   soft ring, clearly apart from the dark-red overnight and gold saved pins. */
+.pin-marker.pin-pick > div {
+  background: hsl(148 36% 30%);
+  color: hsl(42 36% 96%);
+  box-shadow: 0 0 0 3px hsl(148 36% 30% / 0.25), 0 4px 10px hsl(0 0% 0% / 0.28);
+}
 
 .leaflet-popup-content-wrapper {
   background: hsl(var(--card));

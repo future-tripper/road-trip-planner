@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTrip, type PlannerTab } from "@/lib/state";
+import { drivePicksForDay } from "@/lib/drivePicks";
 import { fetchConditions, type ConditionResult, type ConditionsResponse } from "@/lib/conditions";
 import { conditionPointIdForDay, dayDateLabel, dogWalkWindow, forecastForDay } from "@/lib/forecast";
 import { collectHazards, dedupeHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS, nwsPointPage, type Hazard } from "@/lib/safety";
@@ -20,7 +21,7 @@ import {
   Bone, Mountain, Sparkles, Trees, Bed, UtensilsCrossed, Baby, Clock,
   Sun, X, ExternalLink, Check, Plus, ChevronRight, MapPin, Trash2, Hotel,
   Flame, CloudSun, AlertTriangle, Wind, RefreshCw, Dog, Martini, MapPinned, CarFront,
-  ChevronDown, Signpost,
+  ChevronDown, Signpost, Map as MapIcon,
 } from "lucide-react";
 
 const TAG_DEFS: { tag: Tag; label: string; Icon: any }[] = [
@@ -44,6 +45,12 @@ export function Planner() {
   useEffect(() => {
     if (!selectedPlaceId) return;
     const route = routes.find(r => r.id === selectedRouteId) ?? routes[0];
+    // Overnight-city stops belong to TWO consecutive days (arrive day N, depart
+    // day N+1). If the place is already in the open day, stay put — jumping to
+    // the first match collapsed the day the user was actually looking at and
+    // scrolled the pane away from the card they just clicked.
+    const activeDay = activeDayId ? allDays.find(d => d.id === activeDayId) : undefined;
+    if (activeDay && route.dayIds.includes(activeDay.id) && activeDay.stopIds.includes(selectedPlaceId)) return;
     const day = findDayForStopInRoute(selectedPlaceId, route);
     if (day && day.id !== activeDayId) setActiveDayId(day.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -247,7 +254,7 @@ function relatedStops(selected: Stop, route: Route, limit = 6): { stop: Stop; re
 // Deliberately small: it never dominates vertical space. Rich per-place context
 // now lives inside each tab (Drive/Itinerary/All stops/Book/Plan).
 function SelectedPlaceBar({ tab, setTab }: { tab: PlannerTab; setTab: (t: PlannerTab) => void }) {
-  const { selectedPlaceId, setSelectedPlaceId, selectedRouteId } = useTrip();
+  const { selectedPlaceId, setSelectedPlaceId, selectedRouteId, setMobileView } = useTrip();
   if (!selectedPlaceId) return null;
   const stop = stops.find(s => s.id === selectedPlaceId);
   if (!stop) return null;
@@ -326,6 +333,11 @@ function SelectedPlaceBar({ tab, setTab }: { tab: PlannerTab; setTab: (t: Planne
 
       {/* One compact row of tab jumps — omit the tab you're already on. */}
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        {/* On phones the map and planner are separate views, so a planner
+            selection was invisible on the map — this jumps to the pin. */}
+        <span className="lg:hidden">
+          <JumpChip onClick={() => setMobileView("map")} testid="chip-jump-map" Icon={MapIcon} label="Show on map" />
+        </span>
         {tab !== "drive" && day && (
           <JumpChip onClick={() => setTab("drive")} testid="chip-jump-drive" Icon={CarFront} label={`Drive · Day ${day.num}`} />
         )}
@@ -536,18 +548,9 @@ function DrivePane() {
   const selectedStop = selectedPlaceId ? stops.find(s => s.id === selectedPlaceId) : undefined;
   const selectedInThisDay = !!selectedStop && !!selectedDay && selectedDay.stopIds.includes(selectedStop.id);
   const dayIndex = Math.max(0, daysForRoute.findIndex(d => d.id === selectedDay?.id));
-  const dayStops = selectedDay
-    ? selectedDay.stopIds.map(id => stops.find(s => s.id === id)).filter((s): s is Stop => !!s)
-    : [];
-  // The designated lunch + energy-burn stop leads; kid/dog picks only render
-  // when they are genuinely different stops (no triple-duplicate cards).
-  const lunchStop = dayStops.find(s => s.lunch)
-    ?? dayStops.find(s => s.tags.includes("food-break") && s.kind !== "overnight")
-    ?? dayStops.find(s => s.kind === "city") ?? dayStops[1] ?? dayStops[0];
-  const kidStop = dayStops.find(s => (s.category === "playground" || s.category === "kid-museum") && s.id !== lunchStop?.id)
-    ?? dayStops.find(s => s.tags.includes("kid-friendly") && s.kind !== "overnight" && s.id !== lunchStop?.id);
-  const dogStop = dayStops.find(s => s.tags.includes("dog-friendly") && s.kind !== "overnight" && s.id !== lunchStop?.id && s.id !== kidStop?.id)
-    ?? dayStops.find(s => !!s.dogNote && !s.photoOnly && s.kind !== "overnight" && s.id !== lunchStop?.id && s.id !== kidStop?.id);
+  // The four pick roles are shared with the map (distinctive pins) — the
+  // selection rules live in lib/drivePicks so both views always agree.
+  const { highlight: highlightStop, lunch: lunchStop, kid: kidStop, dog: dogStop } = drivePicksForDay(selectedDay);
   const hotel = selectedDay ? hotels.find(h => h.city === selectedDay.hotelCity) : undefined;
   const guide = selectedDay ? bookingGuides.find(g => g.city === selectedDay.hotelCity) : undefined;
 
@@ -574,7 +577,7 @@ function DrivePane() {
       <PaneHeader
         title="Drive"
         eyebrow={`Day ${selectedDay.num} of ${selectedRoute.totalDays}`}
-        body="A simplified in-car view: today’s drive, best kid reset, dog break, food/patio idea, and booking target."
+        body="A simplified in-car view: today’s drive, the day’s highlight, best kid reset, dog break, food/patio idea, and booking target."
       />
       {selectedStop && (
         <div
@@ -670,10 +673,11 @@ function DrivePane() {
         </section>
 
         {selectedInThisDay && selectedStop && selectedStop.kind !== "overnight" &&
-          ![kidStop?.id, dogStop?.id, lunchStop?.id].includes(selectedStop.id) && (
+          ![kidStop?.id, dogStop?.id, lunchStop?.id, highlightStop?.id].includes(selectedStop.id) && (
             <DrivePick title="Selected place" Icon={MapPin} stop={selectedStop} dayId={selectedDay.id} testid="drive-selected-pick" highlight />
         )}
         <div className="grid gap-2">
+          <DrivePick title="Today’s highlight" Icon={Sparkles} stop={highlightStop} dayId={selectedDay.id} testid="drive-highlight-pick" highlight={selectedStop?.id === highlightStop?.id} />
           <DrivePick title="Lunch pit stop" Icon={UtensilsCrossed} stop={lunchStop} dayId={selectedDay.id} testid="drive-food-pick" highlight={selectedStop?.id === lunchStop?.id} />
           <DrivePick title="Kid reset" Icon={Baby} stop={kidStop} dayId={selectedDay.id} testid="drive-kid-pick" highlight={selectedStop?.id === kidStop?.id} />
           <DrivePick title="Dog break" Icon={Dog} stop={dogStop} dayId={selectedDay.id} testid="drive-dog-pick" highlight={selectedStop?.id === dogStop?.id} />
@@ -840,12 +844,9 @@ function DaysPane() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPlaceId]);
 
-  const rowRef = useRef<HTMLLIElement>(null);
-  useEffect(() => {
-    if (selectedDay && rowRef.current) {
-      rowRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [selectedDay?.id, selectedPlaceId]);
+  // No scroll effect here: the selected StopCard inside the opened day scrolls
+  // itself into view. Scrolling the day header to the top at the same time
+  // made two smooth-scrolls fight and the pane jump away from what was clicked.
 
   return (
     <div>
@@ -872,7 +873,6 @@ function DaysPane() {
             <li
               key={d.id}
               data-testid={`day-row-${d.num}`}
-              ref={isSelectedDay ? rowRef : undefined}
               className={`bg-card ${isSelectedDay ? "ring-2 ring-inset ring-accent/40" : ""}`}
             >
               <button
@@ -945,9 +945,18 @@ function StopCard({ stop, compact }: { stop: Stop; compact?: boolean }) {
   const isActive = activeStopId === stop.id || isSelected;
   const cardRef = useRef<HTMLLIElement>(null);
   useEffect(() => {
-    if (isSelected && cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!isSelected || !cardRef.current) return;
+    const el = cardRef.current;
+    // Only scroll when the card is out of view (selected from the map or
+    // another tab). If any of it is visible the user probably just clicked it —
+    // scrolling then moved the pane out from under their finger.
+    const pane = el.closest(".scroll-pane");
+    if (pane) {
+      const pr = pane.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      if (r.bottom > pr.top + 24 && r.top < pr.bottom - 24) return;
     }
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [isSelected]);
   const select = () => { setActiveStopId(stop.id); setSelectedPlaceId(stop.id); };
   return (
@@ -1104,7 +1113,7 @@ function DayChecklist({ dayId }: { dayId: string }) {
 }
 
 function StopsPane() {
-  const { filters, selectedRouteId, selectedPlaceId, setSelectedPlaceId } = useTrip();
+  const { filters, selectedRouteId, selectedPlaceId, setSelectedPlaceId, selectionOrigin } = useTrip();
   const selectedRoute = routes.find(r => r.id === selectedRouteId) ?? routes[0];
   const routeIds = routeDays(selectedRoute).flatMap(d => d.stopIds);
   // Bonus/optional detours aren't on any day's stopIds (they're off-polyline
@@ -1121,9 +1130,16 @@ function StopsPane() {
     [selectedOnRoute, selectedStop?.id, selectedRoute.id],
   );
 
-  // Selected-results mode: when a place is selected, show it + related stops instead of
-  // a filtered list where it might be buried. Clearing the selection returns to Browse-all.
-  if (selectedOnRoute && selectedStop) {
+  // Selected-results mode shows the place + its related stops — but only when
+  // the selection arrived from OUTSIDE this pane (a map pin, a jump chip from
+  // another tab). Clicking a card while browsing used to swap the whole list
+  // out from under the user; now it just highlights the card in place.
+  const [browsing, setBrowsing] = useState(() => !selectedPlaceId);
+  useEffect(() => {
+    if (selectedPlaceId && selectionOrigin === "map") setBrowsing(false);
+  }, [selectedPlaceId, selectionOrigin]);
+
+  if (!browsing && selectedOnRoute && selectedStop) {
     return (
       <div>
         <PaneHeader
@@ -1135,7 +1151,7 @@ function StopsPane() {
           <span>Options near <strong>{selectedStop.name}</strong></span>
           <button
             type="button"
-            onClick={() => setSelectedPlaceId(null)}
+            onClick={() => { setBrowsing(true); setSelectedPlaceId(null); }}
             data-testid="button-stops-browse-all"
             className="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-[13px] hover-elevate"
           >
