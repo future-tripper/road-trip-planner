@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTrip, type PlannerTab } from "@/lib/state";
+import { drivePicksForDay } from "@/lib/drivePicks";
 import { fetchConditions, type ConditionResult, type ConditionsResponse } from "@/lib/conditions";
 import { conditionPointIdForDay, dayDateLabel, dogWalkWindow, forecastForDay } from "@/lib/forecast";
 import { collectHazards, dedupeHazards, aqiBand, HAZARD_EMOJI, OUTLOOK_LINKS, nwsPointPage, type Hazard } from "@/lib/safety";
@@ -547,23 +548,9 @@ function DrivePane() {
   const selectedStop = selectedPlaceId ? stops.find(s => s.id === selectedPlaceId) : undefined;
   const selectedInThisDay = !!selectedStop && !!selectedDay && selectedDay.stopIds.includes(selectedStop.id);
   const dayIndex = Math.max(0, daysForRoute.findIndex(d => d.id === selectedDay?.id));
-  const dayStops = selectedDay
-    ? selectedDay.stopIds.map(id => stops.find(s => s.id === id)).filter((s): s is Stop => !!s)
-    : [];
-  // The designated lunch + energy-burn stop leads; kid/dog picks only render
-  // when they are genuinely different stops (no triple-duplicate cards).
-  const lunchStop = dayStops.find(s => s.lunch)
-    ?? dayStops.find(s => s.tags.includes("food-break") && s.kind !== "overnight")
-    ?? dayStops.find(s => s.kind === "city") ?? dayStops[1] ?? dayStops[0];
-  // The day's actual payoff — the iconic/scenic stop everyone will remember.
-  // Without this the Drive view was all pit stops (pizza, dog run, rest area),
-  // which made every day read as boring even when the highlight was booked.
-  const highlightStop = dayStops.find(s => s.kind !== "overnight" && s.id !== lunchStop?.id && (s.kind === "iconic" || s.tags.includes("iconic")))
-    ?? dayStops.find(s => s.kind !== "overnight" && s.id !== lunchStop?.id && (s.kind === "scenic" || s.kind === "park" || s.tags.includes("scenic")));
-  const kidStop = dayStops.find(s => (s.category === "playground" || s.category === "kid-museum") && s.id !== lunchStop?.id && s.id !== highlightStop?.id)
-    ?? dayStops.find(s => s.tags.includes("kid-friendly") && s.kind !== "overnight" && s.id !== lunchStop?.id && s.id !== highlightStop?.id);
-  const dogStop = dayStops.find(s => s.tags.includes("dog-friendly") && s.kind !== "overnight" && s.id !== lunchStop?.id && s.id !== kidStop?.id && s.id !== highlightStop?.id)
-    ?? dayStops.find(s => !!s.dogNote && !s.photoOnly && s.kind !== "overnight" && s.id !== lunchStop?.id && s.id !== kidStop?.id && s.id !== highlightStop?.id);
+  // The four pick roles are shared with the map (distinctive pins) — the
+  // selection rules live in lib/drivePicks so both views always agree.
+  const { highlight: highlightStop, lunch: lunchStop, kid: kidStop, dog: dogStop } = drivePicksForDay(selectedDay);
   const hotel = selectedDay ? hotels.find(h => h.city === selectedDay.hotelCity) : undefined;
   const guide = selectedDay ? bookingGuides.find(g => g.city === selectedDay.hotelCity) : undefined;
 

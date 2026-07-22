@@ -106,6 +106,7 @@ function Legend() {
       <div className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground">Legend</div>
       <div className="mt-1.5 space-y-1 text-xs">
         <LegendRow color="hsl(var(--primary))" label="Main stop" />
+        <LegendRow color="hsl(148 36% 30%)" label="Today’s picks (fun · lunch · kid · dog)" />
         <LegendRow color="hsl(var(--accent))" label="Today’s drive" line />
         <LegendRow color="hsl(var(--foreground))" label="Full route ahead" line dashed />
         <LegendRow color="hsl(8 38% 36%)" label="Overnight" />
